@@ -1,0 +1,57 @@
+name: Suggestions & Ideas / Предложения и идеи
+description: Suggest an improvement or new feature for NOVA / Предложить улучшение или новую функцию
+title: "[IDEA] - "
+labels: ["enhancement"]
+body:
+  - type: checkboxes
+    id: search-check
+    attributes:
+      label: Search before suggesting / Поиск перед предложением
+      description: Make sure this idea hasn't been suggested already / Убедитесь, что идея еще не предложена
+      options:
+        - label: "Searched existing issues for similar ideas / Проверил список задач на похожие идеи"
+          required: true
+
+  - type: textarea
+    id: concept
+    attributes:
+      label: Concept / Суть предложения
+      description: What do you want to add or change? / Что вы хотите добавить или изменить?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reason
+    attributes:
+      label: Benefit / В чем польза?
+      description: How will this improve performance or user experience? / Как это улучшит производительность или UX?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority / Приоритет
+      description: How important is this feature for you? / Насколько важна эта функция?
+      options:
+        - "Nice to have / Было бы неплохо"
+        - "Important / Важно"
+        - "Critical / Критично"
+    validations:
+      required: true
+
+  - type: textarea
+    id: technical-details
+    attributes:
+      label: Technical details / Технические детали
+      description: Registry keys, scripts, implementation ideas / Ключи реестра, скрипты, идеи реализации
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional info / Дополнительно
+      description: Screenshots, examples, references / Скриншоты, примеры, ссылки
+    validations:
+      required: false
