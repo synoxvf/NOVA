@@ -1,0 +1,102 @@
+title: Performance Settings
+description: Applies system performance settings, including CPU priority, power plan, memory and file system configuration, and gaming-related settings.
+actions:
+  # CPU scheduler quantum policy
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\PriorityControl', value: 'Win32PrioritySeparation', type: REG_DWORD, data: '24'}
+
+  # CPU reserve for low-priority tasks
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile', value: 'SystemResponsiveness', type: REG_DWORD, data: '10'}
+
+  # Network throttling for multimedia
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile', value: 'NetworkThrottlingIndex', type: REG_DWORD, data: '10'}
+
+  # MMCSS lazy mode
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile', value: 'NoLazyMode', type: REG_DWORD, data: '0'}
+
+  # Cycles before entering lazy mode
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile', value: 'IdleDetectionCycles', type: REG_DWORD, data: '1'}
+
+  # MMCSS idle detection timeout
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile', value: 'LazyModeTimeout', type: REG_DWORD, data: '4294967295'}
+  
+  # Clock interrupt distribution
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\kernel', value: 'SerializeTimerExpiration', type: REG_DWORD, data: '0'}
+
+  # Disabling GameBar
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\GameBar', value: 'AppCaptureEnabled', type: REG_DWORD, data: '0', option: disable-gamebar}
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\GameBar', value: 'AllowAutoGameMode', type: REG_DWORD, data: '0', option: disable-gamebar}
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\GameBar', value: 'UseNexusForGameBarEnabled', type: REG_DWORD, data: '0', option: disable-gamebar}
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\GameBar', value: 'ShowStartupPanel', type: REG_DWORD, data: '0', option: disable-gamebar}
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\GameBar', value: 'AutoGameModeEnabled', type: REG_DWORD, data: '0', option: disable-gamebar}
+  - !registryValue: {path: 'HKCU\System\GameConfigStore', value: 'GameDVR_enabled', type: REG_DWORD, data: '0', option: disable-gamebar}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\GameDVR', value: 'AllowGameDVR', type: REG_DWORD, data: '0', option: disable-gamebar}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WindowsRuntime\ActivatableClassId\Windows.Gaming.GameBar.PresenceServer.Internal.PresenceWriter', value: 'ActivationType', type: REG_DWORD, data: '0', option: disable-gamebar}
+
+  # Enabling HAGS
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\GraphicsDrivers', value: 'HwSchMode', type: REG_DWORD, data: '2'}
+
+  # Import Power Plan "Ultimate Perfomance"
+  - !cmd: {command: 'powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61'}
+
+  # Disabling Hibirnation
+  - !cmd: {command: 'powercfg /h off', option: disable-hibernation'}
+
+  # Memory Management Settings
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management', value: 'DisablePageCombining', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management', value: 'ClearPageFileAtShutdown', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management', value: 'DisablePagingExecutive', type: REG_DWORD, data: '1'}
+
+  # Optimize NTFS
+  - !run: {exe: 'fsutil', args: 'behavior set disablelastaccess 1'}
+  - !run: {exe: 'fsutil', args: 'behavior set disabledeletenotify 0'}
+  - !run: {exe: 'fsutil', args: 'behavior set disable8dot3 1'}
+  - !run: {exe: 'fsutil', args: 'behavior set encryptpagingfile 0'}
+  - !run: {exe: 'fsutil', args: 'behavior set disablecompression 1'}
+  - !run: {exe: 'fsutil', args: 'behavior set enablenonpagedntfs 1'}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\FileSystem', value: 'NtfsMemoryUsage', type: REG_DWORD, data: '2'}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\FileSystem', value: 'NtfsDisableVolsnapHints', type: REG_DWORD, data: '1'}
+
+  # Restriction of background applications
+  - !registryValue: {path: 'HKCU\Control Panel\Mouse', value: 'RawMouseThrottleDuration', type: REG_DWORD, data: '20'}
+
+  # Disabling WDF global logging and Sleep Study collection
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Wdf', value: 'WdfGlobalLogsDisabled', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Wdf', value: 'WdfGlobalSleepStudyDisabled', type: REG_DWORD, data: '1'}
+
+  # Disabling Superfectch and Prefetcher
+  - !service: {name: 'SysMain', operation: change, startup: 4}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters', value: 'EnableSuperfetch', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters', value: 'EnablePrefetcher', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters', value: 'SfTracingState', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters', value: 'EnableBootTrace', type: REG_DWORD, data: '0'}
+
+  # BCD
+  - !run: {exe: 'bcdedit', args: '/timeout 5'}
+  - !run: {exe: 'bcdedit', args: '/set {current} bootmenupolicy legacy'}
+  - !run: {exe: 'bcdedit', args: '/set x2apicpolicy enable'}
+  - !run: {exe: 'bcdedit', args: '/set quietboot Yes'}
+  - !run: {exe: 'bcdedit', args: '/set bootux Disabled'}
+
+  # Disabling Memory Compression
+  - !powerShell: {command: 'Disable-MMAgent -mc'}
+
+  # Disabling USB Power Managements
+  - !powerShell: {command: '.\USB.ps1', exeDir: true}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\usbflags', value: 'DisableHCS0Idle', type: REG_DWORD, data: '1'}
+
+  # Disabling Devices
+  - !run: {exe: 'DEVICES.cmd', exeDir: true}
+
+  # NGEN 
+  - !powerShell: {command: '.\NGEN.ps1', exeDir: true}
+
+  # Reducing svchost.exe process count
+  - !powerShell:
+    command: |
+      Get-ChildItem 'HKLM:\SYSTEM\CurrentControlSet\Services' -ErrorAction SilentlyContinue |
+        Where-Object { $_.PSChildName -notmatch 'Xbl|Xbox' } |
+        ForEach-Object {
+          Set-ItemProperty -Path $_.PSPath -Name 'SvcHostSplitDisable' -Type DWord -Value 1 -Force -ErrorAction SilentlyContinue
+        }
+    wait: true
+  
