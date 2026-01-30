@@ -1,0 +1,43 @@
+name: Bug Report / Сообщить об ошибке
+description: Report a problem or error in NOVA Playbook / Сообщить об ошибке в NOVA
+title: "[BUG] - "
+labels: ["bug"]
+body:
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Technical Checklist / Технический чек-лист
+      description: Please confirm correct installation / Подтвердите правильность установки
+      options:
+        - label: "Used the ISO Injection method / Использовал метод ISO Injection"
+          required: true
+        - label: "Using the latest version of NOVA / Использую последнюю версию NOVA"
+          required: true
+        - label: "No 3rd-party tweaks applied after install / Сторонние твики не применялись"
+          required: true
+        - label: "Checked existing issues for duplicates / Проверил список задач на дубликаты"
+          required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description / Суть проблемы
+      description: What exactly is not working? / Что именно работает не так?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce / Как повторить
+      description: Describe the steps that lead to the error / Опишите действия, которые приводят к ошибке
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional info / Дополнительная информация
+      description: Screenshots, logs, error messages / Скриншоты, логи, сообщения об ошибках
+    validations:
+      required: false

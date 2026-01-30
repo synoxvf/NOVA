@@ -1,0 +1,92 @@
+title: Main Playbook
+description: Main script that executes all Playbook tasks in sequence
+actions:
+  # Preparation 
+  - !writeStatus: {status: 'Preparing files'}
+  - !powerShell:
+    command: |
+      Copy-Item -Path Post-Install -Destination $env:windir -Recurse -Force
+      Copy-Item -Path hosts -Destination $env:SystemRoot\System32\drivers\etc\hosts -Force
+    runas: system
+    wait: true
+    exeDir: true
+
+  # Windows Update
+  - !writeStatus: {status: 'Suspending Windows Updates'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU', value: 'NoAutoUpdate', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU', value: 'AUOptions', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate', value: 'ExcludeWUDriversInQualityUpdate', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching', value: 'SearchOrderConfig', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\WindowsStore', value: 'AutoDownload', type: REG_DWORD, data: '2'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsAI', value: 'DisableAIDataAnalysis', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization', value: 'DODownloadMode', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WindowsSelfHost\UI\Visibility', value: 'HideInsiderPage', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds', value: 'AllowBuildPreview', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds', value: 'EnableExperimentation', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds', value: 'EnableConfigFlighting', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\System\AllowExperimentation', value: 'Value', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\Software\Microsoft\PolicyManager\default\Update', value: 'BranchReadinessLevel', type: REG_DWORD, data: '32'}
+  - !registryKey: {path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\Orchestrator\UScheduler_Oobe\DevHomeUpdate', operation: delete}
+  - !registryKey: {path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\Orchestrator\UScheduler_Oobe\OutlookUpdate', operation: delete}
+  - !registryKey: {path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\Orchestrator\UScheduler_Oobe\CrossDeviceUpdate', operation: delete}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Orchestrator\UScheduler\DevHomeUpdate', value: 'workCompleted', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Orchestrator\UScheduler\OutlookUpdate', value: 'workCompleted', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings', value: 'PauseUpdatesStartTime', type: REG_SZ, data: '2024-01-01T00:00:00Z'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings', value: 'PauseUpdatesExpiryTime', type: REG_SZ, data: '2030-12-31T23:59:59Z'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings', value: 'PauseFeatureUpdatesStartTime', type: REG_SZ, data: '2024-01-01T00:00:00Z'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings', value: 'PauseFeatureUpdatesEndTime', type: REG_SZ, data: '2030-12-31T23:59:59Z'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings', value: 'PauseQualityUpdatesStartTime', type: REG_SZ, data: '2024-01-01T00:00:00Z'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings', value: 'PauseQualityUpdatesEndTime', type: REG_SZ, data: '2030-12-31T23:59:59Z'}
+
+  # Security
+  - !writeStatus: {status: 'Disabling Defender', option: disable-defender}
+  - !task: {path: 'Tasks\security\defender.yml'}
+
+  - !writeStatus: {status: 'Disabling Virtualization', option: disable-vbs}
+  - !task: {path: 'Tasks\security\vbs.yml'}
+
+  # Windows
+  - !writeStatus: {status: 'Removing UWP Apps'}
+  - !task: {path: 'Tasks\windows\appx.yml'}
+
+  - !writeStatus: {status: 'Removing Components'}
+  - !task: {path: 'Tasks\windows\components.yml'}
+
+  - !writeStatus: {status: 'Interface Tuning'}
+  - !task: {path: 'Tasks\windows\ui.yml'}
+
+  # Privacy & Registry
+  - !writeStatus: {status: 'Privacy Tuning'}
+  - !task: {path: 'Tasks\registry\privacy.yml'}
+
+  - !writeStatus: {status: 'Performance Optimization'}
+  - !task: {path: 'Tasks\registry\performance.yml'}
+
+  - !writeStatus: {status: 'Quality of Life (QoL)'}
+  - !task: {path: 'Tasks\registry\qol.yml'}
+
+  # Software (Обычно самый долгий процесс)
+  - !writeStatus: {status: 'Installing Software'}
+  - !task: {path: 'Tasks\software.yml'}
+
+  # Creating Shortcuts
+  - !status: {status: 'Creating Shortcuts'}
+  - !powerShell: {command: '.\SHORTCUT.ps1', exeDir: true, wait: true}
+
+  # Synchronizing System Time
+  - !status: {status: 'Synchronizing System Time'}
+  - !service: {name: "w32time", operation: start, ignoreErrors: true}
+  - !run: {exe: 'w32tm', args: '/config /manualpeerlist:pool.ntp.org /syncfromflags:manual /update'}
+  - !run: {exe: 'w32tm', args: '/config /update'}
+  - !run: {exe: 'w32tm', args: '/resync'}
+
+  # Rebuild Performance Counters
+  - !status: {status: 'Rebuild Performance Counters'}
+  - !run: {exe: 'lodctr', args: '/r'}
+  - !run: {exe: 'lodctr', args: '/r'}
+  - !run: {exe: 'winmgmt', args: '/resyncperf'}
+
+  # Cleaning 
+  - !writeStatus: {status: 'System Cleanup'}
+  - !run: {exe: 'DISM.exe', args: '/Online /Cleanup-Image /StartComponentCleanup /ResetBase', wait: true, ignoreErrors: true}
+  - !powerShell: {command: '.\CLEANER.ps1', exeDir: true, wait: true}

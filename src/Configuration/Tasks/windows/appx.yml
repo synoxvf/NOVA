@@ -1,0 +1,75 @@
+title: APPX
+description: Removal of certain Windows apps
+actions:
+  - !appx: {name: '*Microsoft.Microsoft3DViewer*', type: family}
+  - !appx: {name: '*Microsoft.BingSearch*', type: family}
+  - !appx: {name: '*Microsoft.WindowsCamera*', type: family}
+  - !appx: {name: '*Clipchamp.Clipchamp*', type: family}
+  - !appx: {name: '*Microsoft.WindowsAlarms*', type: family}
+  - !appx: {name: '*Microsoft.Copilot*', type: family}
+  - !appx: {name: '*Microsoft.549981C3F5F10*', type: family}
+  - !appx: {name: '*Microsoft.Windows.DevHome*', type: family}
+  - !appx: {name: '*MicrosoftCorporationII.MicrosoftFamily*', type: family}
+  - !appx: {name: '*Microsoft.WindowsFeedbackHub*', type: family}
+  - !appx: {name: '*Microsoft.Edge.GameAssist*', type: family}
+  - !appx: {name: '*Microsoft.GetHelp*', type: family}
+  - !appx: {name: '*Microsoft.Getstarted*', type: family}
+  - !appx: {name: '*microsoft.windowscommunicationsapps*', type: family}
+  - !appx: {name: '*Microsoft.WindowsMaps*', type: family}
+  - !appx: {name: '*Microsoft.MixedReality.Portal*', type: family}
+  - !appx: {name: '*Microsoft.BingNews*', type: family}
+  - !appx: {name: '*Microsoft.MicrosoftOfficeHub*', type: family}
+  - !appx: {name: '*Microsoft.Office.OneNote*', type: family}
+  - !appx: {name: '*Microsoft.OutlookForWindows*', type: family}
+  - !appx: {name: '*Microsoft.Paint*', type: family}
+  - !appx: {name: '*Microsoft.MSPaint*', type: family}
+  - !appx: {name: '*Microsoft.People*', type: family}
+  - !appx: {name: '*Microsoft.PowerAutomateDesktop*', type: family}
+  - !appx: {name: '*MicrosoftCorporationII.QuickAssist*', type: family}
+  - !appx: {name: '*Microsoft.SkypeApp*', type: family}
+  - !appx: {name: '*Microsoft.MicrosoftSolitaireCollection*', type: family}
+  - !appx: {name: '*Microsoft.MicrosoftStickyNotes*', type: family}
+  - !appx: {name: '*MicrosoftTeams*', type: family}
+  - !appx: {name: '*MSTeams*', type: family}
+  - !appx: {name: '*Microsoft.Todos*', type: family}
+  - !appx: {name: '*Microsoft.WindowsSoundRecorder*', type: family}
+  - !appx: {name: '*Microsoft.Wallet*', type: family}
+  - !appx: {name: '*Microsoft.BingWeather*', type: family}
+  - !appx: {name: '*Microsoft.YourPhone*', type: family}
+  - !appx: {name: '*Microsoft.ZuneMusic*', type: family}
+  - !appx: {name: '*Apprep.Chx*', type: family}
+  - !appx: {name: '*AssignedAccessLockApp*', type: family}
+  - !appx: {name: '*Bing*', type: family}
+  - !appx: {name: '*CamoStudio*', type: family}
+  - !appx: {name: '*Microsoft.Messaging*', type: family}
+  - !appx: {name: '*Microsoft.OneConnect*', type: family}
+  - !appx: {name: '*OOBENetwork*', type: family}
+  - !appx: {name: '*Parental*', type: family}
+  - !appx: {name: '*PeopleExperienceHost*', type: family}
+  - !appx: {name: '*PinningConfirmationDialog*', type: family}
+
+  # Removing Xbox
+  - !appx: {name: '*Microsoft.GamingApp*', type: family, option: uninstall-xbox}
+  - !appx: {name: '*Microsoft.Xbox*', type: family, option: uninstall-xbox}
+  - !appx: {name: '*Microsoft.GamingServices*', type: family, option: uninstall-xbox}
+  - !appx: {name: '*Microsoft.XboxGameCallableUI*', type: family, option: uninstall-xbox}
+  - !appx: {name: '*Microsoft.Xbox.TCUI*', type: family, option: uninstall-xbox}
+  - !appx: {name: '*Microsoft.XboxApp*', type: family, option: uninstall-xbox}
+  - !appx: {name: '*Microsoft.XboxGameOverlay*', type: family, option: uninstall-xbox}
+  - !appx: {name: '*Microsoft.XboxGamingOverlay*', type: family, option: uninstall-xbox}
+  - !appx: {name: '*Microsoft.XboxIdentityProvider*', type: family, option: uninstall-xbox}
+  - !appx: {name: '*Microsoft.XboxSpeechToTextOverlay*', type: family, option: uninstall-xbox}
+
+  - !service: {name: 'XblAuthManager', operation: change, startup: 4, option: uninstall-xbox}
+  - !service: {name: 'XblGameSave', operation: change, startup: 4, option: uninstall-xbox}
+  - !service: {name: 'XboxGipSvc', operation: change, startup: 4, option: uninstall-xbox}
+  - !service: {name: 'XboxNetApiSvc', operation: change, startup: 4, option: uninstall-xbox}
+
+  - !scheduledTask: {path: '\Microsoft\Windows\XblGameSave\XblGameSaveTask', operation: delete, option: uninstall-xbox}
+
+  # Other 
+  - !appx: {name: '*WindowsBackup*', type: app}
+  - !appx: {name: '*StartMenuExperienceHost*', operation: clearCache}
+  - !appx: {name: '*Windows.SecHealthUI*', operation: clearCache}
+  - !appx: {name: '*Windows.Search*', operation: clearCache} 
+  - !appx: {name: '*Client.CBS*', operation: clearCache}

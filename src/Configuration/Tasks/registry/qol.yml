@@ -1,0 +1,72 @@
+title: Quality of Life
+description: Small tweaks to improve usability
+actions:
+  # Decrease Shutdown Time
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control', value: 'WaitToKillServiceTimeout', type: REG_SZ, data: '2000'}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control', value: 'WaitToKillService', type: REG_SZ, data: '2000'}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control', value: 'HungAppTimeout', type: REG_SZ, data: '2000'}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control', value: 'AutoEndTasks', type: REG_SZ, data: '1'}
+
+  # Disabling Mouse Acceleration
+  - !registryValue: {path: 'HKCU\Control Panel\Mouse', value: 'MouseSpeed', type: REG_SZ, data: '0'}
+  - !registryValue: {path: 'HKCU\Control Panel\Mouse', value: 'MouseThreshold1', type: REG_SZ, data: '0'}
+  - !registryValue: {path: 'HKCU\Control Panel\Mouse', value: 'MouseThreshold2', type: REG_SZ, data: '0'}
+
+  # Removing the suffix “- Shortcut” when creating a shortcut
+  - !registryValue: {path: 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\NamingTemplates', value: 'ShortcutNameTemplate', type: REG_SZ, data: '"%s.lnk"'}
+  
+  # Show full path in Explorer header
+  - !registryValue: {path: 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState', value: 'FullPath', type: REG_DWORD, data: '1'}
+
+  # Disabling automatic restart after BSOD (Blue Screen)
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\CrashControl', value: 'AutoReboot', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\CrashControl', value: 'CrashDumpEnabled', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\CrashControl', value: 'LogEvent', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\CrashControl', value: 'DisplayParameters', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\CrashControl\StorageTelemetry', value: 'DeviceDumpEnabled', type: REG_DWORD, data: '0'}
+
+  # Disabling Menu Show Delay
+  - !registryValue: {path: 'HKCU\Control Panel\Desktop', value: 'MenuShowDelay', type: REG_SZ, data: '0'}
+
+  # Disabling startup delay for desktop apps
+  - !registryValue: {path: 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Serialize', value: 'StartupDelayInMSec', type: REG_DWORD, data: '0'}
+
+  # Disabling Bitlocker
+  - !registryValue: {path: 'HKLM\System\CurrentControlSet\Control\BitLocker', value: 'PreventDeviceEncryption', type: REG_DWORD, data: '1', option: disable-bitlocker}
+  - !service: {name: 'BDESVC', operation: change, startup: 4, option: disable-bitlocker} 
+
+  # Disabling Reserved Storage
+  - !run: {exe: 'DISM.exe', args: '/Online /Set-ReservedStorageState /State:Disabled', wait: true, ignoreErrors: true}
+
+  # Disabling Windows Platform Binary Table (WPBT)
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager', value: 'DisableWpbtExecution', type: REG_DWORD, data: '1'}
+
+  # Disabling the Ease of Access sounds and warnings upon activation, such as the infamous Sticky Keys sound.
+  - !registryValue: {path: 'HKCU\Control Panel\Accessibility', value: 'Warning Sounds', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKCU\Control Panel\Accessibility', value: 'Sound on Activation', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKCU\Control Panel\Accessibility', value: 'WindowsEffect ', type: REG_DWORD, data: '0'}
+
+  # Add .pow File Association
+  - !registryValue: {path: 'HKCR\.pow', value: 'FriendlyTypeName', type: REG_SZ, data: 'Power Plan'}
+  - !registryValue: {path: 'HKCR\.pow\DefaultIcon', value: '', type: REG_EXPAND_SZ, data: '%SystemRoot%\System32\powercfg.cpl,-202'}
+  - !registryValue: {path: 'HKCR\.pow\shell\Import\command', value: '', type: REG_SZ, data: 'powercfg /import "%1"'}
+
+  # Disabling Remote assistance
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Remote Assistance', value: 'fAllowFullControl', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Remote Assistance', value: 'fAllowToGetHelp', type: REG_DWORD, data: '0'}
+  - !run: {exe: 'netsh', args: 'advfirewall firewall set rule group="Remote Assistance" new enable=no'}
+
+  # Disabling system restore
+  - !registryValue: {path: 'HKLM\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows NT\SystemRestore', value: 'DisableConfig', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows NT\SystemRestore', value: 'DisableConfig', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows NT\SystemRestore', value: 'DisableSR', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows NT\SystemRestore', value: 'DisableSR', type: REG_DWORD, data: '1'}
+  - !scheduledTask: {path: '\Microsoft\Windows\SystemRestore\SR', operation: disable}
+  - !powerShell: {command: 'Disable-ComputerRestore -Drive "C:\"', wait: true}
+  - !service: {name: 'swprv', operation: change, startup: 4}
+  - !service: {name: 'VSS', operation: change, startup: 4}
+  - !service: {name: 'SDRSVC', operation: change, startup: 4}
+  - !service: {name: 'wbengine', operation: change, startup: 4}
+
+  # Enables full drive indexing
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows Search\Gather\Windows\SystemIndex', value: 'EnableFindMyFiles', type: REG_DWORD, data: '1'}

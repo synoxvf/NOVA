@@ -1,0 +1,106 @@
+title: Install Software
+description: Installs selected browsers, media players, archivers, and game launchers with predefined settings and policies
+actions:
+  # DirectX
+  - !writeStatus: {status: 'Installing DirectX'}
+  - !software:
+    name: 'directx'
+    source: chocolatey
+    package: 'directx'
+
+  # Browsers
+  - !writeStatus: {status: 'Installing Brave', option: browser-brave}
+  - !download: 
+    option: browser-brave
+    url: 'https://github.com/brave/brave-browser/releases/latest/download/BraveBrowserStandaloneSetup.exe'
+    destination: 'BraveBrowserStandaloneSetup.exe'
+    package: 'brave'
+  - !cmd: {command: 'start "BraveBrowserStandaloneSetup" /b /wait "BraveBrowserStandaloneSetup.exe" /silent /install', exeDir: true, option: browser-brave}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\BraveSoftware\Brave', value: 'BraveVPNDisabled', type: REG_DWORD, data: '1', option: browser-brave}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\BraveSoftware\Brave', value: 'BraveRewardsDisabled', type: REG_DWORD, data: '1', option: browser-brave}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\BraveSoftware\Brave', value: 'BraveWalletDisabled', type: REG_DWORD, data: '1', option: browser-brave}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\BraveSoftware\Brave', value: 'BraveAIChatEnabled', type: REG_DWORD, data: '0', option: browser-brave}
+
+  - !writeStatus: {status: 'Installing FireFox', option: browser-FireFox}
+  - !software:
+    option: browser-firefox
+    name: 'firefox'
+    source: chocolatey
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Mozilla\Firefox', value: 'BackgroundAppUpdate', data: '0', type: REG_DWORD, option: browser-firefox}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Mozilla\Firefox', value: 'DisableDefaultBrowserAgent', type: REG_DWORD, data: '1', option: browser-firefox} 
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Mozilla\Firefox', value: 'DisableTelemetry', type: REG_DWORD, data: '1', option: browser-firefox}
+  - !scheduledTask: {path: '\Mozilla\Firefox Default Browser Agent 308046B0AF4A39CB', operation: disable, ignoreErrors: true, option: browser-firefox}
+  - !scheduledTask: {path: '\Mozilla\Firefox Default Browser Agent D2CEEC440E2074BD', operation: disable, ignoreErrors: true, option: browser-firefox} 
+
+  - !writeStatus: {status: 'Installing Chrome', option: browser-chrome}
+  - !software:
+    option: browser-chrome
+    name: 'googlechrome'
+    source: chocolatey
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Google\Chrome', value: 'ChromeCleanupReportingEnabled', type: REG_DWORD, data: '0', option: browser-chrome}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Google\Chrome', value: 'ChromeCleanupEnabled', type: REG_DWORD, data: '0', option: browser-chrome}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Google\Chrome', value: 'MetricsReportingEnabled', type: REG_DWORD, data: '0', option: browser-chrome}
+  - !service: {name: 'gupdate', operation: change, startup: 4, option: browser-chrome}
+  - !service: {name: 'gupdatem', operation: change, startup: 4, option: browser-chrome}
+  - !scheduledTask: {path: '\GoogleUpdateTaskMachineCore', operation: disable, ignoreErrors: true, option: browser-chrome}
+  - !scheduledTask: {path: '\GoogleUpdateTaskMachineUA', operation: disable, ignoreErrors: true, option: browser-chrome}
+
+  - !status: {status: 'Installing LibreWolf', option: browser-librewolf}
+  - !software:
+    name: 'librewolf'
+    source: chocolatey
+    option: browser-librewolf
+    package: 'librewolf'
+
+  # Media players
+  - !writeStatus: {status: 'Installing MPC-HC', option: mpc-hc}
+  - !software:
+    option: mpc-hc
+    name: 'mpc-hc'
+    source: chocolatey
+
+  - !writeStatus: {status: 'Installing VLC', option: vlc}
+  - !software:
+    option: vlc
+    name: 'vlc'
+    source: chocolatey
+
+  # Archivers
+  - !writeStatus: {status: 'Installing 7zip', option: 7-zip}
+  - !software:
+    option: 7-zip
+    name: '7zip'
+    source: chocolatey
+
+  - !writeStatus: {status: 'Installing WinRAR', option: winrar}
+  - !software:
+    option: winrar
+    name: 'winrar'
+    source: chocolatey
+
+  # Launchers 
+  - !writeStatus: {status: 'Installing Steam', option: steam}
+  - !software:
+    option: steam
+    name: 'steam'
+    source: chocolatey
+
+  - !writeStatus: {status: 'Installing EA app', option: ea-app}
+  - !software:
+    option: ea-app
+    name: 'ea-app'
+    source: chocolatey
+  - !taskKill {name: 'EA*'}
+
+  - !writeStatus: {status: 'Installing Epic Games', option: epicgameslauncher}
+  - !software:
+    option: epicgameslauncher
+    name: 'epicgameslauncher'
+    source: chocolatey
+
+  - !writeStatus: {status: 'Installing Ubisoft', option: ubisoft-connect}
+  - !software:
+    option: ubisoft-connect
+    name: 'ubisoft-connect'
+    source: chocolatey
+

@@ -1,0 +1,113 @@
+title: User Interface & Personalization
+description: Configures UI, Taskbar, Start Menu.
+actions:
+  - !run:
+    exeDir: true
+    exe: 'CLEANUP.bat'
+
+  # Disabling Transparency Effects
+  - !registryValue: {path: 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: 'UseOLEDTaskbarTransparency', type: REG_DWORD, data: '0', option: disable-transparency}
+  - !registryValue: {path: 'HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize', value: 'EnableTransparency', type: REG_DWORD, data: '0', option: disable-transparency}
+
+  # Disabling Smart App Control
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\CI\Policy', value: 'VerifiedAndReputablePolicyState', type: REG_DWORD, data: '0'}
+
+  # Disabling Sticky Keys
+  - !registryValue: {path: 'HKCU\Control Panel\Accessibility\StickyKeys', value: 'Flags', type: REG_SZ, data: '506'}
+  - !registryValue: {path: 'HKCU\Control Panel\Accessibility\StickyKeys', value: 'HotkeyFlags', type: REG_SZ, data: '58'}
+
+  # Disabling Wallpaper Compression
+  - !registryValue: {path: 'HKCU\Control Panel\Desktop', value: 'JPEGImportQuality', type: REG_DWORD, data: '100'}
+
+  # Taskbar Alignment
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: 'TaskbarAl', type: REG_DWORD, data: '0', option: 'taskbar-left'}
+  
+  # Hide Search Icon/Box
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Search', value: 'SearchboxTaskbarMode', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Search', value: 'SearchboxTaskbarModeCache', type: REG_DWORD, data: '1', scope: defaultUser}
+
+  # Hide Task View Button
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: 'ShowTaskViewButton', type: REG_DWORD, data: '0'}
+  
+  # Hide 'People' Band
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\People', value: 'PeopleBand', type: REG_DWORD, data: '0'}
+  
+  # Enabling 'End Task' on Taskbar
+  - !registryValue: {path: 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings', value: 'TaskbarEndTask', type: REG_DWORD, data: '1'}
+  
+  # Show Seconds in Clock
+  - !registryValue: {path: 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: 'ShowSecondsInSystemClock', type: REG_DWORD, data: '1'}
+
+  # Hide Recommendations & Recently Added
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\PolicyManager\current\device\Start', value: 'HideRecommendedSection', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\PolicyManager\current\device\Education', value: 'IsEducationEnvironment', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer', value: 'HideRecommendedSection', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer', value: 'ShowOrHideMostUsedApps', type: REG_DWORD, data: '2'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer', value: 'NoStartMenuMFUprogramsList', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKCU\Software\Policies\Microsoft\Windows\Explorer', value: 'HideRecentlyAddedApps', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: 'Start_IrisRecommendations', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: 'Start_AccountNotifications', type: REG_DWORD, data: '0'}
+
+  # Show Hidden Files & Extensions
+  - !registryValue: {path: 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: 'Hidden', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: 'HideFileExt', type: REG_DWORD, data: '0'}
+
+  # Hide Recent Items & Frequent Folders
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer', value: 'ShowFrequent', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer', value: 'ShowRecent', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: 'Start_TrackDocs', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer', value: 'ClearRecentDocsOnExit', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer', value: 'NoRecentDocsHistory', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKCU\SOFTWARE\Policies\Microsoft\Windows\Explorer', value: 'NoRemoteDestinations', type: REG_DWORD, data: '1'}
+
+  # Removing Network Icon from Explorer Sidebar
+  - !registryValue: {path: 'HKLM\SOFTWARE\Classes\CLSID\{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}\ShellFolder', value: 'Attributes', type: REG_DWORD, data: '2962489444'}
+
+  # Enabling Legacy Context Menu
+  - !registryValue: {path: 'HKEY_CURRENT_USER\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32', value: '', type: REG_SZ, data: '', option: 'context-legacy'}
+  
+  # New File Entries (.bat, .ps1, .reg)
+  - !registryValue: {path: 'HKCR\.bat\ShellNew', value: 'ItemName', type: REG_EXPAND_SZ, data: '%windir%\System32\acppage.dll,-6002'}
+  - !registryValue: {path: 'HKCR\.bat\ShellNew', value: 'NullFile', type: REG_SZ, data: ''}
+  - !registryValue: {path: 'HKCR\.ps1', value: '', type: REG_SZ, data: 'Microsoft.PowerShellScript.1'}
+  - !registryValue: {path: 'HKCR\.ps1\ShellNew', value: 'NullFile', type: REG_SZ, data: ''}
+  - !registryValue: {path: 'HKCR\Microsoft.PowerShellScript.1', value: '', type: REG_SZ, data: 'Windows PowerShell Script'}
+  - !registryValue: {path: 'HKCR\Microsoft.PowerShellScript.1', value: 'FriendlyTypeName', type: REG_SZ, data: 'Windows PowerShell Script'}
+  - !registryValue: {path: 'HKCR\.reg\ShellNew', value: 'NullFile', type: REG_SZ, data: ''}
+  - !registryValue: {path: 'HKCR\.reg\ShellNew', value: 'ItemName', type: REG_EXPAND_SZ, data: '%windir%\regedit.exe,-309'}
+  
+  # Adding TakeOwnership
+  - !registryValue: {path: 'HKCR\Directory\shell\runas', value: '', type: REG_SZ, data: 'Take Ownership'}
+  - !registryValue: {path: 'HKCR\Directory\shell\runas', value: 'HasLUAShield', type: REG_SZ, data: ''}
+  - !registryValue: {path: 'HKCR\Directory\shell\runas', value: 'NoWorkingDirectory', type: REG_SZ, data: ''}
+  - !registryValue: {path: 'HKCR\Directory\shell\runas\command', value: '', type: REG_SZ, data: 'cmd.exe /c takeown /f %1 /r /d y && icacls %1 /grant administrators:F'}
+  - !registryValue: {path: 'HKCR\Directory\shell\runas\command', value: 'IsolatedCommand', type: REG_SZ, data: 'cmd.exe /c takeown /f %1 /r /d y && icacls %1 /grant administrators:F'}
+  
+  # Removing Bloat Context Entries
+  - !registryKey: {path: 'HKCR\*\shellex\ContextMenuHandlers\ModernSharing', operation: delete}
+  - !registryKey: {path: 'HKCR\AllFilesystemObjects\shellex\ContextMenuHandlers\ModernSharing', operation: delete}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked', value: '{1d27f844-3a1f-4410-85ac-14651078412d}', type: REG_SZ, data: ''}
+  - !registryValue: {path: 'HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked', value: '{1d27f844-3a1f-4410-85ac-14651078412d}', type: REG_SZ, data: ''}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked', value: '{7AD84985-87B4-4a16-BE58-8B72A5B390F7}', type: REG_SZ, data: ''}
+
+  # Disabling News and Interests
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Feeds', value: 'ShellFeedsTaskbarViewMode', type: REG_DWORD, data: '2'}
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Feeds', value: 'ShellFeedsEnabled', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKCU\SOFTWARE\Policies\Microsoft\Windows\Windows Feeds', value: 'EnableFeeds', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Dsh', value: 'AllowNewsAndInterests', type: REG_DWORD, data: '0'}
+
+  # Disabling Lockscreen Tips/Overlays
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\Personalization', value: 'LockScreenOverlaysDisabled', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: 'RotatingLockScreenEnabled', type: REG_DWORD, data: '0'}
+
+  # Appling Nova Theme
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: 'RotatingLockScreenOverlayEnabled', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: 'SubscribedContent-338387Enabled', type: REG_DWORD, data: '0'}
+
+  - !registryValue: {path: 'HKCU\SOFTWARE\Policies\Microsoft\Windows\CloudContent', value: 'DisableSpotlightCollectionOnDesktop', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKCU\SOFTWARE\Policies\Microsoft\Windows\CloudContent', value: 'DisableWindowsSpotlightFeatures', type: REG_DWORD, data: '1'}
+
+  - !registryValue: {path: 'HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize', value: 'AppsUseLightTheme', type: REG_DWORD, data: '0', option: nova-theme}
+  - !registryValue: {path: 'HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize', value: 'SystemUsesLightTheme', type: REG_DWORD, data: '0', option: nova-theme}
+
+  - !run: {exe: 'WALLPAPER.bat', exeDir: true, wait: true, option: nova-theme}

@@ -1,0 +1,14 @@
+title: Virtualization-Based Security (VBS) Protections
+description: Disables Memory Integrity, Kernel Shadow Stacks, and other virtualization-based protections for maximum FPS and compatibility
+option: disable-vbs
+actions:
+  # Disabling Memory Integrity
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity', value: 'Enabled', type: REG_DWORD, data: '0'}
+
+  # Disabling Kernel-mode Hardware-enforced Stack Protection
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks', value: 'Enabled', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks', value: 'WasEnabledBy', operation: 'delete'}
+
+  # Disabling Virtualization-Based Security (VBS)
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard', value: 'EnableVirtualizationBasedSecurity', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard', value: 'RequirePlatformSecurityFeatures', type: REG_DWORD, data: '0'}
