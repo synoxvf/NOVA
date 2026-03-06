@@ -2,8 +2,9 @@
 setlocal enabledelayedexpansion
 
 :: Modify aero.theme to set default dark theme and wallpaper
-icacls "%WINDIR%\Resources\Themes\aero.theme" /reset /t >nul 2>&1
-PowerShell -NoP -C "$Content = (Get-Content '%WINDIR%\Resources\Themes\aero.theme'); $Content = $Content -replace 'Wallpaper=%%SystemRoot%%.*', 'Wallpaper=%%SystemRoot%%\web\wallpaper\Windows\img100.jpg'; $Content = $Content -replace 'SystemMode=.*', 'SystemMode=Dark'; $Content -replace 'AppMode=.*', 'AppMode=Dark' | Set-Content '%WINDIR%\Resources\Themes\aero.theme'"
+takeown /f "%WINDIR%\Resources\Themes\aero.theme" >nul 2>&1
+icacls "%WINDIR%\Resources\Themes\aero.theme" /grant Administrators:F /t >nul 2>&1
+PowerShell -NoP -C "$Content = (Get-Content '%WINDIR%\Resources\Themes\aero.theme'); $Content = $Content -replace 'Wallpaper=%%SystemRoot%%.*', 'Wallpaper=%%SystemRoot%%\web\wallpaper\Windows\img100.jpg'; $Content = $Content -replace 'SystemMode=.*', 'SystemMode=Dark'; $Content = $Content -replace 'AppMode=.*', 'AppMode=Dark'; $Content -replace 'ColorizationColor=.*', 'ColorizationColor=0XC4744DA9' | Set-Content '%WINDIR%\Resources\Themes\aero.theme'"
 
 :: Copy wallpaper files from playbook directory to Windows
 if exist "img100.jpg" (
@@ -21,7 +22,8 @@ if exist "img106.jpg" (
     move /y "img106.jpg" "%WINDIR%\Web\Screen\img106.jpg"
     icacls "%WINDIR%\Web\Screen\img106.jpg" /reset >nul 2>&1
 )
- 
+
+
 set "RunEC=0"
 
 :: Iterate through all user hives including Default
@@ -35,9 +37,24 @@ for /f "usebackq tokens=2 delims=\" %%A in (`reg query "HKEY_USERS" ^| findstr /
     )
 )
 
+
+call :WALLRUN ".DEFAULT" "%SystemRoot%\System32\config\systemprofile"
+
 exit /b %RunEC%
 
 :WALLRUN
+:: Set custom LogonUI accent color
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "DisableLogonBackgroundImage" /t REG_DWORD /d 1 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Personalization" /v "PersonalColors_Background" /t REG_SZ /d "#744DA9" /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Personalization" /v "PersonalColors_Accent" /t REG_SZ /d "#744DA9" /f >nul 2>&1
+reg add "HKU\%~1\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Accent" /v "AccentColorMenu" /t REG_DWORD /d 0xFFA94D74 /f >nul 2>&1
+reg add "HKU\%~1\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Accent" /v "StartColorMenu" /t REG_DWORD /d 0xFF994165 /f >nul 2>&1
+reg add "HKU\%~1\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Accent" /v "AccentPalette" /t REG_BINARY /d E6CEF000BA9CD4008963B800744DA90065419900402775001F0E5400EF695000 /f >nul 2>&1
+reg add "HKU\%~1\SOFTWARE\Microsoft\Windows\DWM" /v "ColorizationColor" /t REG_DWORD /d 0xC4744DA9 /f >nul 2>&1
+reg add "HKU\%~1\SOFTWARE\Microsoft\Windows\DWM" /v "ColorizationColorBalance" /t REG_DWORD /d 89 /f >nul 2>&1
+reg add "HKU\%~1\SOFTWARE\Microsoft\Windows\DWM" /v "ColorizationAfterglow" /t REG_DWORD /d 0xC4744DA9 /f >nul 2>&1
+reg add "HKU\%~1\SOFTWARE\Microsoft\Windows\DWM" /v "AccentColor" /t REG_DWORD /d 0xFFA94D74 /f >nul 2>&1
+
 if exist "%~2\Microsoft\Windows\Themes\Transcoded_000" set "wallChanged=true" & goto lockScreen
 
 :: Check if Desktop Spotlight is enabled

@@ -62,6 +62,9 @@ actions:
   - !writeStatus: {status: 'Performance Optimization'}
   - !task: {path: 'Tasks\registry\performance.yml'}
 
+  - !writeStatus: {status: 'Network Settings'}
+  - !task: {path: 'Tasks\registry\network.yml'}
+
   - !writeStatus: {status: 'Quality of Life (QoL)'}
   - !task: {path: 'Tasks\registry\qol.yml'}
 
@@ -90,3 +93,4 @@ actions:
   - !writeStatus: {status: 'System Cleanup'}
   - !run: {exe: 'DISM.exe', args: '/Online /Cleanup-Image /StartComponentCleanup /ResetBase', wait: true, ignoreErrors: true}
   - !powerShell: {command: '.\CLEANER.ps1', exeDir: true, wait: true}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce', value: 'DeleteDefaultUser0', type: REG_SZ, data: 'powershell.exe -NoProfile -WindowStyle Hidden -Command "net user defaultuser0 /delete >$null 2>&1; Get-CimInstance Win32_UserProfile | Where-Object LocalPath -match ''defaultuser0'' | Remove-CimInstance >$null 2>&1"'}
