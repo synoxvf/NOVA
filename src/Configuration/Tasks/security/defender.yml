@@ -2,8 +2,6 @@ title: Windows Defender
 description: Disables Windows Defender and LSA Protected Process Light components to ensure complete disablement.
 option: disable-defender
 actions:
-  # Run script on first login
-  - !run: {exe: "RunOnce.bat", exeDir: true, wait: true}
   - !registryValue: {path: 'HKU\AME_UserHive_Default\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce', value: RunScript, data: 'powershell -EP Bypass -NoP -WindowStyle Hidden -Command "& \"$([Environment]::GetFolderPath(''Windows''))\Setup\Scripts\DEFENDER.ps1\""', type: REG_SZ}
 
   # Disabling LSA Protected Process Light
@@ -14,7 +12,7 @@ actions:
 
   # Run the Windows Defender disabling script as TrustedInstaller
   - !powerShell:
-    command: '.\DEFENDER.ps1'
+    command: '.\Scripts\DEFENDER.ps1'
     runas: trustedInstaller
     wait: true
     exeDir: true

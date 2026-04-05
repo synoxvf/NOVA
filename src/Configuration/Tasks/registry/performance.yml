@@ -18,9 +18,32 @@ actions:
 
   # MMCSS idle detection timeout
   - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile', value: 'LazyModeTimeout', type: REG_DWORD, data: '4294967295'}
+
+  # MMCSS internal scheduler period
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile', value: 'SchedulerPeriod', type: REG_DWORD, data: '1000000'}
+
+  # MMCSS timer resolution granularity
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile', value: 'SchedulerTimerResolution', type: REG_DWORD, data: '10000'}
   
   # Clock interrupt distribution
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\kernel', value: 'SerializeTimerExpiration', type: REG_DWORD, data: '0'}
+
+  # MMCSS audio tuning
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Audio', value: 'Scheduling Category', type: REG_SZ, data: 'Medium'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Audio', value: 'Priority', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Audio', value: 'Priority When Yielded', type: REG_DWORD, data: '16'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Pro Audio', value: 'Scheduling Category', type: REG_SZ, data: 'Medium'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Pro Audio', value: 'Priority', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Pro Audio', value: 'Priority When Yielded', type: REG_DWORD, data: '16'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games', value: 'Scheduling Category', type: REG_SZ, data: 'High'}
+
+  # Reducing the priority of background processes
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\MoUsoCoreWorker.exe\PerfOptions', value: 'CpuPriorityClass', type: REG_DWORD, data: '5'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\CompatTelRunner.exe\PerfOptions', value: 'CpuPriorityClass', type: REG_DWORD, data: '5'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\DeviceCensus.exe\PerfOptions', value: 'CpuPriorityClass', type: REG_DWORD, data: '5'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\backgroundTaskHost.exe\PerfOptions', value: 'CpuPriorityClass', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\RuntimeBroker.exe\PerfOptions', value: 'CpuPriorityClass', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\spoolsv.exe\PerfOptions', value: 'CpuPriorityClass', type: REG_DWORD, data: '5'}
 
   # Disabling GameBar
   - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\GameBar', value: 'AppCaptureEnabled', type: REG_DWORD, data: '0', option: disable-gamebar}
@@ -35,8 +58,9 @@ actions:
   # Enabling HAGS
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\GraphicsDrivers', value: 'HwSchMode', type: REG_DWORD, data: '2'}
 
-  # Import Power Plan "Ultimate Perfomance"
+  # Import Power Plan "Ultimate Perfomance" & "NOVA"
   - !cmd: {command: 'powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61'}
+  - !cmd: {command: 'powercfg /import "%windir%\NOVA.pow" 00000000-0000-0000-0000-000000000000'}
 
   # Disabling Hibirnation
   - !cmd: {command: 'powercfg /h off', option: disable-hibernation'}
@@ -45,6 +69,9 @@ actions:
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management', value: 'DisablePageCombining', type: REG_DWORD, data: '1'}
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management', value: 'ClearPageFileAtShutdown', type: REG_DWORD, data: '0'}
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management', value: 'DisablePagingExecutive', type: REG_DWORD, data: '1'}
+
+  # Disabling Fault Tolerant Heap
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\FTH', value: 'Enabled', type: REG_DWORD, data: '0'}
 
   # Optimize NTFS
   - !run: {exe: 'fsutil', args: 'behavior set disablelastaccess 1'}
@@ -64,7 +91,7 @@ actions:
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Wdf', value: 'WdfGlobalSleepStudyDisabled', type: REG_DWORD, data: '1'}
 
   # Disabling Superfectch and Prefetcher
-  - !service: {name: 'SysMain', operation: change, startup: 4}
+  - !registryValue: {path: 'HKU\AME_UserHive_Default\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce', value: DisableSysMain, data: 'powershell -EP Bypass -NoP -WindowStyle Hidden -Command "& \"$([Environment]::GetFolderPath(''Windows''))\Setup\Scripts\SysMain.ps1\""', type: REG_SZ}
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters', value: 'EnableSuperfetch', type: REG_DWORD, data: '0'}
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters', value: 'EnablePrefetcher', type: REG_DWORD, data: '0'}
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters', value: 'SfTracingState', type: REG_DWORD, data: '0'}
@@ -87,6 +114,9 @@ actions:
   # Disabling Devices
   - !run: {exe: 'DEVICES.cmd', exeDir: true}
 
+  # Enabling MSI Mode
+  - !powerShell: {command: '.\MSI.ps1', exeDir: true}
+
   # NGEN 
   - !powerShell: {command: '.\NGEN.ps1', exeDir: true}
 
@@ -99,4 +129,11 @@ actions:
           Set-ItemProperty -Path $_.PSPath -Name 'SvcHostSplitDisable' -Type DWord -Value 1 -Force -ErrorAction SilentlyContinue
         }
     wait: true
+
+  # Disabling Scheduled Tasks
+  - !powerShell:
+    command: |
+      Get-ScheduledTask | Where-Object { $_.TaskName -notin @('MsCtfMonitor') } | Disable-ScheduledTask
+    wait: true
+
   

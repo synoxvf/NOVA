@@ -53,6 +53,9 @@ actions:
   - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\SQMClient\Windows', value: 'CEIPEnable', type: REG_DWORD, data: '0'}
   - !registryValue: {path: 'HKLM\SOFTWARE\Wow6432Node\Microsoft\VSCommon\15.0\SQM', value: 'OptIn', type: REG_DWORD, data: '0'}
   - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Messenger\Client', value: 'CEIP', type: REG_DWORD, data: '2'}
+  
+  # Disabling MDM
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\CurrentVersion\MDM', value: 'DisableRegistration', type: REG_DWORD, data: '1'}
 
   # Disabling Office Telemetry
   - !registryValue: {path: 'HKCU\Software\Policies\Microsoft\office\16.0\common', value: 'sendcustomerdata', type: REG_DWORD, data: '0'}
@@ -226,11 +229,15 @@ actions:
   - !service: {name: 'DiagTrack', operation: change, startup: 4}
   - !service: {name: 'dmwappushservice', operation: change, startup: 4}
   - !service: {name: 'WerSvc', operation: change, startup: 4}
+  - !service: {name: 'pla', operation: change, startup: 4}
   - !service: {name: 'lfsvc', operation: change, startup: 4}
   - !service: {name: 'MapsBroker', operation: change, startup: 4}
   - !service: {name: 'PcaSvc', operation: change, startup: 4}
   - !service: {name: 'wisvc', operation: change, startup: 4}
   - !service: {name: 'RetailDemo', operation: change, startup: 4}
+  - !service: {name: 'TrkWks', operation: change, startup: 4}
+  - !service: {name: 'Wecsvc', operation: change, startup: 4}
+  - !service: {name: 'TroubleshootingSvc', operation: change, startup: 4}
 
   # Disabling Tasks
   - !scheduledTask: {path: '\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector', operation: disable, ignoreErrors: true}

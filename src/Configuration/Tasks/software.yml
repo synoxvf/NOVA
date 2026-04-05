@@ -16,34 +16,21 @@ actions:
     destination: 'BraveBrowserStandaloneSetup.exe'
     package: 'brave'
   - !cmd: {command: 'start "BraveBrowserStandaloneSetup" /b /wait "BraveBrowserStandaloneSetup.exe" /silent /install', exeDir: true, option: browser-brave}
-  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\BraveSoftware\Brave', value: 'BraveVPNDisabled', type: REG_DWORD, data: '1', option: browser-brave}
-  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\BraveSoftware\Brave', value: 'BraveRewardsDisabled', type: REG_DWORD, data: '1', option: browser-brave}
-  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\BraveSoftware\Brave', value: 'BraveWalletDisabled', type: REG_DWORD, data: '1', option: browser-brave}
-  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\BraveSoftware\Brave', value: 'BraveAIChatEnabled', type: REG_DWORD, data: '0', option: browser-brave}
+  - !powerShell: {command: '.\BROWSER.ps1 -Brave -uBlock', exeDir: true, option: browser-brave}
 
   - !writeStatus: {status: 'Installing FireFox', option: browser-FireFox}
   - !software:
     option: browser-firefox
     name: 'firefox'
     source: chocolatey
-  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Mozilla\Firefox', value: 'BackgroundAppUpdate', data: '0', type: REG_DWORD, option: browser-firefox}
-  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Mozilla\Firefox', value: 'DisableDefaultBrowserAgent', type: REG_DWORD, data: '1', option: browser-firefox} 
-  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Mozilla\Firefox', value: 'DisableTelemetry', type: REG_DWORD, data: '1', option: browser-firefox}
-  - !scheduledTask: {path: '\Mozilla\Firefox Default Browser Agent 308046B0AF4A39CB', operation: disable, ignoreErrors: true, option: browser-firefox}
-  - !scheduledTask: {path: '\Mozilla\Firefox Default Browser Agent D2CEEC440E2074BD', operation: disable, ignoreErrors: true, option: browser-firefox} 
+  - !powerShell: {command: '.\BROWSER.ps1 -Firefox', exeDir: true, option: browser-firefox}
 
   - !writeStatus: {status: 'Installing Chrome', option: browser-chrome}
   - !software:
     option: browser-chrome
     name: 'googlechrome'
     source: chocolatey
-  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Google\Chrome', value: 'ChromeCleanupReportingEnabled', type: REG_DWORD, data: '0', option: browser-chrome}
-  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Google\Chrome', value: 'ChromeCleanupEnabled', type: REG_DWORD, data: '0', option: browser-chrome}
-  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Google\Chrome', value: 'MetricsReportingEnabled', type: REG_DWORD, data: '0', option: browser-chrome}
-  - !service: {name: 'gupdate', operation: change, startup: 4, option: browser-chrome}
-  - !service: {name: 'gupdatem', operation: change, startup: 4, option: browser-chrome}
-  - !scheduledTask: {path: '\GoogleUpdateTaskMachineCore', operation: disable, ignoreErrors: true, option: browser-chrome}
-  - !scheduledTask: {path: '\GoogleUpdateTaskMachineUA', operation: disable, ignoreErrors: true, option: browser-chrome}
+  - !powerShell: {command: '.\BROWSER.ps1 -Chrome', exeDir: true, option: '!uninstall-edge'}
 
   - !status: {status: 'Installing LibreWolf', option: browser-librewolf}
   - !software:
@@ -51,6 +38,9 @@ actions:
     source: chocolatey
     option: browser-librewolf
     package: 'librewolf'
+
+  - !status: {status: 'Configuring Edge', option: '!uninstall-edge'}
+  - !powerShell: {command: '.\BROWSER.ps1 -Edge -uBlock', exeDir: true, option: '!uninstall-edge'}
 
   # Media players
   - !writeStatus: {status: 'Installing MPC-HC', option: mpc-hc}
@@ -103,4 +93,3 @@ actions:
     option: ubisoft-connect
     name: 'ubisoft-connect'
     source: chocolatey
-
