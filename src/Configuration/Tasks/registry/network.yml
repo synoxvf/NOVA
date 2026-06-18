@@ -1,6 +1,14 @@
 title: Network Settings
 description: Optimized network stack.
 actions:
+  # Disabling legacy broadcast protocols
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient', value: 'EnableMulticast', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters', value: 'EnableMulticast', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Services\NetBT\Parameters', value: 'EnableLMHOSTS', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Services\NetBT\Parameters\Interfaces', value: 'NetbiosOptions', type: REG_DWORD, data: '2'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad', value: 'WpadOverride', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad', value: 'WpadOverride', type: REG_DWORD, data: '1'}
+
   # TCP Receive Window auto-tuning
   - !run: {exe: 'netsh', args: 'int tcp set global autotuninglevel=normal'}
 
@@ -50,30 +58,8 @@ actions:
   # Offloading UDP segmentation to NIC
   - !run: {exe: 'netsh', args: 'int udp set global uso=enabled'}
 
-  # ARP/Neighbor cache capacity
-  - !run: {exe: 'netsh', args: 'int ipv4 set global neighborcachelimit=4096'}
-
-  # Route destination cache capacity
-  - !run: {exe: 'netsh', args: 'int ipv4 set global routecachelimit=4096'}
-
-  # Disabling ICMP route redirects
-  - !run: {exe: 'netsh', args: 'int ipv4 set global icmpredirects=disabled'}
-
   # Checksum offload
   - !run: {exe: 'netsh', args: 'int ipv4 set global taskoffload=enabled'}
-
-  # Media sense event logging
-  - !run: {exe: 'netsh', args: 'int ipv4 set global mediasenseeventlog=disabled'}
-  
-  # Fast retransmission timeout
-  - !run: {exe: 'netsh', args: 'int tcp set global initialrto=2000'}
-
-  # TCP connection retry attempts
-  - !run: {exe: 'netsh', args: 'int tcp set global maxsynretransmissions=2'}
-
-  # Expanding ephemeral port range
-  - !run: {exe: 'netsh', args: 'int ipv4 set dynamicport tcp start=1025 num=64511'}
-  - !run: {exe: 'netsh', args: 'int ipv4 set dynamicport udp start=1025 num=64511'}
 
   # Enable QoS in system
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\QoS', value: 'Do not use NLA', type: REG_SZ, data: '1'}

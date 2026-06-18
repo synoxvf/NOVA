@@ -9,6 +9,7 @@ Reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessMana
 
 DevManView.exe /enable "Generic Bluetooth Adapter"
 DevManView.exe /enable "Microsoft Radio Device Enumeration Bus"
+DevManView.exe /enable "Microsoft Device Association Root Enumerator"
 
 schtasks.exe /change /enable /TN "\Microsoft\Windows\Bluetooth\UninstallDeviceTask"
 pause

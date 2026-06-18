@@ -26,7 +26,7 @@ actions:
   - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile', value: 'SchedulerTimerResolution', type: REG_DWORD, data: '10000'}
   
   # Clock interrupt distribution
-  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\kernel', value: 'SerializeTimerExpiration', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\kernel', value: 'SerializeTimerExpiration', type: REG_DWORD, data: '1'}
 
   # MMCSS audio tuning
   - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Audio', value: 'Scheduling Category', type: REG_SZ, data: 'Medium'}
@@ -111,9 +111,6 @@ actions:
   - !powerShell: {command: '.\USB.ps1', exeDir: true}
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\usbflags', value: 'DisableHCS0Idle', type: REG_DWORD, data: '1'}
 
-  # Disabling Devices
-  - !run: {exe: 'DEVICES.cmd', exeDir: true}
-
   # Enabling MSI Mode
   - !powerShell: {command: '.\MSI.ps1', exeDir: true}
 
@@ -135,5 +132,3 @@ actions:
     command: |
       Get-ScheduledTask | Where-Object { $_.TaskName -notin @('MsCtfMonitor') } | Disable-ScheduledTask
     wait: true
-
-  

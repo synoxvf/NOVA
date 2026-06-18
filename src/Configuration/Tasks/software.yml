@@ -93,3 +93,28 @@ actions:
     option: ubisoft-connect
     name: 'ubisoft-connect'
     source: chocolatey
+
+  # Development Tools
+  - !writeStatus: {status: 'Installing Visual Studio Code', option: vscode}
+  - !software:
+    option: vscode
+    name: 'vscode'
+    source: chocolatey
+
+  - !writeStatus: {status: 'Installing Visual Studio 2026', option: vs2026}
+  - !software:
+    option: vs2026
+    name: 'visualstudio2026community'
+    source: chocolatey
+
+  - !writeStatus: {status: 'Installing Git', option: git}
+  - !software:
+    option: git
+    name: 'git'
+    source: chocolatey
+
+  - !writeStatus: {status: 'Installing Notepad++', option: notepadplusplus}
+  - !software:
+    option: notepadplusplus
+    name: 'notepadplusplus'
+    source: chocolatey

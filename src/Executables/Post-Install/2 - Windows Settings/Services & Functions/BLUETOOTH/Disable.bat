@@ -7,8 +7,9 @@ Reg.exe add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessMana
 Reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\bluetoothSync" /v "Value" /t REG_SZ /d "Deny" /f
 Reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\cellularData" /v "Value" /t REG_SZ /d "Deny" /f
 
-DevManView /disable "Generic Bluetooth Adapter"
-DevManView /disable "Microsoft Radio Device Enumeration Bus"
+DevManView.exe /disable "Generic Bluetooth Adapter"
+DevManView.exe /disable "Microsoft Radio Device Enumeration Bus"
+DevManView.exe /disable "Microsoft Device Association Root Enumerator"
 
 schtasks.exe /change /disable /TN "\Microsoft\Windows\Bluetooth\UninstallDeviceTask"
 pause

@@ -78,13 +78,6 @@ actions:
   - !status: {status: 'Creating Shortcuts'}
   - !powerShell: {command: '.\SHORTCUT.ps1', exeDir: true, wait: true}
 
-  # Synchronizing System Time
-  - !status: {status: 'Synchronizing System Time'}
-  - !service: {name: "w32time", operation: start, ignoreErrors: true}
-  - !run: {exe: 'w32tm', args: '/config /manualpeerlist:pool.ntp.org /syncfromflags:manual /update'}
-  - !run: {exe: 'w32tm', args: '/config /update'}
-  - !run: {exe: 'w32tm', args: '/resync'}
-
   # Rebuild Performance Counters
   - !status: {status: 'Rebuild Performance Counters'}
   - !run: {exe: 'lodctr', args: '/r'}
