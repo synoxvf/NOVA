@@ -7,9 +7,7 @@
 0.0.0.0 star-randsrv.bsg.brave.com
 
 # Mozilla
-0.0.0.0 content-signature-2.cdn.mozilla.net
 0.0.0.0 crash-stats.mozilla.org
-0.0.0.0 firefox.settings.services.mozilla.com
 0.0.0.0 incoming.telemetry.mozilla.org
 0.0.0.0 telemetry.mozilla.org
 

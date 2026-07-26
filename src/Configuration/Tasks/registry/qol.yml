@@ -70,3 +70,27 @@ actions:
 
   # Enables full drive indexing
   - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows Search\Gather\Windows\SystemIndex', value: 'EnableFindMyFiles', type: REG_DWORD, data: '1'}
+
+  # Monthly drive optimization
+  - !powerShell:
+    command: |
+      $defragTask = Get-ScheduledTask -TaskPath '\Microsoft\Windows\Defrag\' -TaskName 'ScheduledDefrag' -ErrorAction SilentlyContinue
+      if ($null -ne $defragTask) {
+        $trigger = New-ScheduledTaskTrigger -Weekly -WeeksInterval 4 -DaysOfWeek Sunday -At 3am
+        Set-ScheduledTask -TaskPath '\Microsoft\Windows\Defrag\' -TaskName 'ScheduledDefrag' -Trigger $trigger | Out-Null
+        Enable-ScheduledTask -TaskPath '\Microsoft\Windows\Defrag\' -TaskName 'ScheduledDefrag' | Out-Null
+      }
+    wait: true
+
+  # Limiting Defender scans
+  - !powerShell:
+    command: |
+      Set-MpPreference `
+        -ScanAvgCPULoadFactor 20 `
+        -EnableLowCpuPriority $true `
+        -ScanOnlyIfIdleEnabled $true `
+        -DisableCpuThrottleOnIdleScans $false `
+        -DisableCatchupQuickScan $true `
+        -DisableCatchupFullScan $true
+    option: enable-defender
+    wait: true

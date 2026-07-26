@@ -47,10 +47,8 @@ actions:
 
   # Disabling GameBar
   - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\GameBar', value: 'AppCaptureEnabled', type: REG_DWORD, data: '0', option: disable-gamebar}
-  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\GameBar', value: 'AllowAutoGameMode', type: REG_DWORD, data: '0', option: disable-gamebar}
   - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\GameBar', value: 'UseNexusForGameBarEnabled', type: REG_DWORD, data: '0', option: disable-gamebar}
   - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\GameBar', value: 'ShowStartupPanel', type: REG_DWORD, data: '0', option: disable-gamebar}
-  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\GameBar', value: 'AutoGameModeEnabled', type: REG_DWORD, data: '0', option: disable-gamebar}
   - !registryValue: {path: 'HKCU\System\GameConfigStore', value: 'GameDVR_enabled', type: REG_DWORD, data: '0', option: disable-gamebar}
   - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\GameDVR', value: 'AllowGameDVR', type: REG_DWORD, data: '0', option: disable-gamebar}
   - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WindowsRuntime\ActivatableClassId\Windows.Gaming.GameBar.PresenceServer.Internal.PresenceWriter', value: 'ActivationType', type: REG_DWORD, data: '0', option: disable-gamebar}
@@ -61,9 +59,11 @@ actions:
   # Import Power Plan "Ultimate Perfomance" & "NOVA"
   - !cmd: {command: 'powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61'}
   - !cmd: {command: 'powercfg /import "%windir%\NOVA.pow" 00000000-0000-0000-0000-000000000000'}
+  - !powerShell: {command: '.\POWERPLAN.ps1', exeDir: true, wait: true}
+  - !cmd: {command: 'powercfg /setactive 00000000-0000-0000-0000-000000000000'}
 
   # Disabling Hibirnation
-  - !cmd: {command: 'powercfg /h off', option: disable-hibernation'}
+  - !cmd: {command: 'powercfg /h off', option: 'disable-hibernation'}
 
   # Memory Management Settings
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management', value: 'DisablePageCombining', type: REG_DWORD, data: '1'}
@@ -127,8 +127,6 @@ actions:
         }
     wait: true
 
-  # Disabling Scheduled Tasks
-  - !powerShell:
-    command: |
-      Get-ScheduledTask | Where-Object { $_.TaskName -notin @('MsCtfMonitor') } | Disable-ScheduledTask
-    wait: true
+  # Disabling Store wake tasks
+  - !scheduledTask: {path: '\Microsoft\Windows\InstallService\WakeUpAndContinueUpdates', operation: disable, ignoreErrors: true}
+  - !scheduledTask: {path: '\Microsoft\Windows\InstallService\WakeUpAndScanForUpdates', operation: disable, ignoreErrors: true}

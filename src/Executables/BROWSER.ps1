@@ -218,17 +218,19 @@ if ($Firefox)   {
 
 if ($Edge) {
     Write-BrowserPolicy 'HKLM\SOFTWARE\Policies\Microsoft\Edge' @{
-        StartupBoostEnabled           = 0
-        BackgroundModeEnabled         = 0
-        MetricsReportingEnabled       = 0
-        DiagnosticData                = 0
-        MicrosoftRewardsDisabled      = 1
-        ConfigureDoNotTrack           = 1
-        WebRtcMultipleRoutesEnabled   = 0
-        ShowRecommendationsEnabled    = 0
-        BingAdsSuppression            = 1
-        NewTabPageContentEnabled      = 0
-        HideFirstRunExperience        = 1
+        StartupBoostEnabled             = 0
+        BackgroundModeEnabled           = 0
+        MetricsReportingEnabled         = 0
+        DiagnosticData                  = 0
+        PersonalizationReportingEnabled = 0
+        UserFeedbackAllowed             = 0
+        MicrosoftRewardsDisabled        = 1
+        ConfigureDoNotTrack             = 1
+        WebRtcMultipleRoutesEnabled     = 0
+        ShowRecommendationsEnabled      = 0
+        BingAdsSuppression              = 1
+        NewTabPageContentEnabled        = 0
+        HideFirstRunExperience          = 1
     }
 
     if ($uBlock) {

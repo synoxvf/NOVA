@@ -1,7 +1,7 @@
-# credit https://github.com/zoicware/DefenderProTools 
+# credit https://github.com/zoicware/DefenderProTools
 If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]'Administrator')) {
   Start-Process PowerShell.exe -ArgumentList ("-NoProfile -ExecutionPolicy Bypass -File `"{0}`"" -f $PSCommandPath) -Verb RunAs
-  Exit	
+  Exit
 }
 
 $file1 = @'
@@ -300,20 +300,20 @@ Windows Registry Editor Version 5.00
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WinDefend]
 "Start"=dword:00000004
 
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\MDCoreSvc]
+"Start"=dword:00000004
+
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\MsSecFlt]
 "Start"=dword:00000004
 
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\MsSecWfp]
 "Start"=dword:00000004
 
-[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\PlutonHsp2]
-"Start"=dword:00000004
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\WMI\Autologger\DefenderAuditLogger]
+"Start"=dword:00000000
 
-[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\PlutonHeci]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Hsp]
-"Start"=dword:00000004
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\WMI\Autologger\DefenderApiLogger]
+"Start"=dword:00000000
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection]
 "DisallowExploitProtectionOverride"=dword:00000001
@@ -370,9 +370,6 @@ Windows Registry Editor Version 5.00
 [HKEY_LOCAL_MACHINE\SOFTWARE\Classes\exefile\shell\runasuser]
 "NoSmartScreen"=""
 
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\SmartScreen.exe]
-"Debugger"="systray.exe"
-
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer]
 "SettingsPageVisibility"="hide:windowsdefender"
 
@@ -380,31 +377,38 @@ Windows Registry Editor Version 5.00
 "UILockdown"=dword:00000001
 '@
 
+# Runs protected registry operations through TrustedInstaller (zoicware 52bb246).
 function Run-Trusted([String]$command) {
-
-  Stop-Service -Name TrustedInstaller -Force -ErrorAction SilentlyContinue
-  #get bin path to revert later
-  $service = Get-WmiObject -Class Win32_Service -Filter "Name='TrustedInstaller'"
-  $DefaultBinPath = $service.PathName
-  #convert command to base64 to avoid errors with spaces
+  try {
+    Stop-Service -Name TrustedInstaller -Force -ErrorAction Stop -WarningAction Stop
+  }
+  catch {
+    taskkill.exe /im TrustedInstaller.exe /f >$null
+  }
+  $service = Get-CimInstance -ClassName Win32_Service -Filter "Name='TrustedInstaller'"
+  $defaultBinPath = $service.PathName
+  $trustedInstallerPath = "$env:SystemRoot\servicing\TrustedInstaller.exe"
+  if ($defaultBinPath -ne $trustedInstallerPath) {
+    $defaultBinPath = $trustedInstallerPath
+  }
   $bytes = [System.Text.Encoding]::Unicode.GetBytes($command)
   $base64Command = [Convert]::ToBase64String($bytes)
-  #change bin to command
-  sc.exe config TrustedInstaller binPath= "cmd.exe /c powershell.exe -encodedcommand $base64Command" | Out-Null
-  #run the command
+  sc.exe config TrustedInstaller binPath= "cmd.exe /c powershell.exe -EncodedCommand $base64Command" | Out-Null
   sc.exe start TrustedInstaller | Out-Null
-  #set bin back to default
-  sc.exe config TrustedInstaller binpath= "`"$DefaultBinPath`"" | Out-Null
-  Stop-Service -Name TrustedInstaller -Force -ErrorAction SilentlyContinue
-
+  sc.exe config TrustedInstaller binPath= "`"$defaultBinPath`"" | Out-Null
+  try {
+    Stop-Service -Name TrustedInstaller -Force -ErrorAction Stop -WarningAction Stop
+  }
+  catch {
+    taskkill.exe /im TrustedInstaller.exe /f >$null
+  }
 }
 
 $code = @'
 function defeatMsMpEng {
-    
+
 $key = 'Registry::HKU\S-1-5-21-*\Volatile Environment'
-    
-# Define types and modules
+
 $I = [int32]
 $M = $I.module.GetType("System.Runtime.InteropServices.Marshal")
 $P = $I.module.GetType("System.IntPtr")
@@ -414,12 +418,10 @@ $DM = [AppDomain]::CurrentDomain.DefineDynamicAssembly(1, 1).DefineDynamicModule
 $U = [uintptr]
 $Z = [uintptr]::Size
 
-# Define dynamic types
 0..5 | ForEach-Object { $D += $DM.DefineType("AveYo_$_", 1179913, [ValueType]) }
 $D += $U
 4..6 | ForEach-Object { $D += $D[$_].MakeByRefType() }
 
-# Define PInvoke methods
 $F = @(
     'kernel', 'CreateProcess', ($S, $S, $I, $I, $I, $I, $I, $S, $D[7], $D[8]),
     'advapi', 'RegOpenKeyEx', ($U, $S, $I, $I, $D[9]),
@@ -429,7 +431,6 @@ $F = @(
 )
 0..4 | ForEach-Object { $9 = $D[0].DefinePInvokeMethod($F[3 * $_ + 1], $F[3 * $_] + "32", 8214, 1, $S, $F[3 * $_ + 2], 1, 4) }
 
-# Define fields
 $DF = @(
     ($P, $I, $P),
     ($I, $I, $I, $I, $P, $D[1]),
@@ -439,22 +440,17 @@ $DF = @(
 )
 1..5 | ForEach-Object { $k = $_; $n = 1; $DF[$_ - 1] | ForEach-Object { $9 = $D[$k].DefineField("f" + $n++, $_, 6) } }
 
-# Create types
 $T = @()
 0..5 | ForEach-Object { $T += $D[$_].CreateType() }
 
-# Create instances
 0..5 | ForEach-Object { New-Variable -Name "A$_" -Value ([Activator]::CreateInstance($T[$_])) -Force }
 
-# Define functions
 function F ($1, $2) { $T[0].GetMethod($1).Invoke(0, $2) }
 function M ($1, $2, $3) { $M.GetMethod($1, [type[]]$2).Invoke(0, $3) }
 
-# Allocate memory
 $H = @()
 $Z, (4 * $Z + 16) | ForEach-Object { $H += M "AllocHGlobal" $I $_ }
 
-# Check user and start service if necessary
 if ([environment]::username -ne "system") {
     $TI = "TrustedInstaller"
     Start-Service $TI -ErrorAction SilentlyContinue
@@ -477,15 +473,12 @@ if ([environment]::username -ne "system") {
     return
 }
 
-# Clear environment variable
 $env:R = ''
 Remove-ItemProperty -Path $key -Name $id -Force -ErrorAction SilentlyContinue
 
-# Set privileges
 $e = [diagnostics.process].GetMember('SetPrivilege', 42)[0]
 'SeSecurityPrivilege', 'SeTakeOwnershipPrivilege', 'SeBackupPrivilege', 'SeRestorePrivilege' | ForEach-Object { $e.Invoke($null, @("$_", 2)) }
 
-# Define function to set registry DWORD values
 function RegSetDwords ($hive, $key, [array]$values, [array]$dword, $REG_TYPE = 4, $REG_ACCESS = 2, $REG_OPTION = 0) {
     $rok = ($hive, $key, $REG_OPTION, $REG_ACCESS, ($hive -as $D[9]))
     F "RegOpenKeyEx" $rok
@@ -497,58 +490,41 @@ function RegSetDwords ($hive, $key, [array]$values, [array]$dword, $REG_TYPE = 4
     $rsv = $null
 }
 
-
- 
     $disable = 1
     $disable_rev = 0
     $disable_SMARTSCREENFILTER = 1
-    #stop security center and defender commandline exe
     stop-service 'wscsvc' -force -ErrorAction SilentlyContinue *>$null
     Stop-Process -name 'OFFmeansOFF', 'MpCmdRun' -force -ErrorAction SilentlyContinue
- 
-    $HKLM = [uintptr][uint32]2147483650 
+
+    $HKLM = [uintptr][uint32]2147483650
     $VALUES = 'ServiceKeepAlive', 'PreviousRunningMode', 'IsServiceRunning', 'DisableAntiSpyware', 'DisableAntiVirus', 'PassiveMode'
     $DWORDS = 0, 0, 0, $disable, $disable, $disable
-    #apply registry values (not all will apply)
-    RegSetDwords $HKLM 'SOFTWARE\Policies\Microsoft\Windows Defender' $VALUES $DWORDS 
+    RegSetDwords $HKLM 'SOFTWARE\Policies\Microsoft\Windows Defender' $VALUES $DWORDS
     RegSetDwords $HKLM 'SOFTWARE\Microsoft\Windows Defender' $VALUES $DWORDS
-    [GC]::Collect() 
+    [GC]::Collect()
     Start-Sleep 1
-    #run defender command line to disable msmpeng service
     Push-Location "$env:programfiles\Windows Defender"
     $mpcmdrun = ('OFFmeansOFF.exe', 'MpCmdRun.exe')[(test-path 'MpCmdRun.exe')]
     Start-Process -wait $mpcmdrun -args '-DisableService -HighPriority'
-    #wait for service to close before continuing
     $wait = 14
-    while ((get-process -name 'MsMpEng' -ea 0) -and $wait -gt 0) { 
+    while ((get-process -name 'MsMpEng' -ea 0) -and $wait -gt 0) {
         $wait--
         Start-Sleep 1
     }
- 
-    #rename defender commandline exe
-    $location = split-path $(Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Services\WinDefend' ImagePath -ErrorAction SilentlyContinue).ImagePath.Trim('"')
-    Push-Location $location
-    Rename-Item MpCmdRun.exe -NewName 'OFFmeansOFF.exe' -force -ErrorAction SilentlyContinue
- 
-    #cleanup scan history
-    Remove-Item "$env:ProgramData\Microsoft\Windows Defender\Scans\mpenginedb.db" -force -ErrorAction SilentlyContinue
-    Remove-Item "$env:ProgramData\Microsoft\Windows Defender\Scans\History\Service" -recurse -force -ErrorAction SilentlyContinue
 
-    #apply keys that are blocked when msmpeng is running
-    RegSetDwords $HKLM 'SOFTWARE\Policies\Microsoft\Windows Defender' $VALUES $DWORDS 
+    RegSetDwords $HKLM 'SOFTWARE\Policies\Microsoft\Windows Defender' $VALUES $DWORDS
     RegSetDwords $HKLM 'SOFTWARE\Microsoft\Windows Defender' $VALUES $DWORDS
 
-    #disable smartscreen
     if ($disable_SMARTSCREENFILTER) {
         Set-ItemProperty 'HKLM:\CurrentControlSet\Control\CI\Policy' 'VerifiedAndReputablePolicyState' 0 -type Dword -force -ErrorAction SilentlyContinue
-        Set-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' 'SmartScreenEnabled' 'Off' -force -ErrorAction SilentlyContinue 
+        Set-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' 'SmartScreenEnabled' 'Off' -force -ErrorAction SilentlyContinue
         Get-Item Registry::HKEY_Users\S-1-5-21*\Software\Microsoft -ea 0 | ForEach-Object {
             Set-ItemProperty "$($_.PSPath)\Windows\CurrentVersion\AppHost" 'EnableWebContentEvaluation' $disable_rev -type Dword -force -ErrorAction SilentlyContinue
             Set-ItemProperty "$($_.PSPath)\Windows\CurrentVersion\AppHost" 'PreventOverride' $disable_rev -type Dword -force -ErrorAction SilentlyContinue
             New-Item "$($_.PSPath)\Edge\SmartScreenEnabled" -ErrorAction SilentlyContinue *>$null
             Set-ItemProperty "$($_.PSPath)\Edge\SmartScreenEnabled" '(Default)' $disable_rev -ErrorAction SilentlyContinue
         }
-        if ($disable_rev -eq 0) { 
+        if ($disable_rev -eq 0) {
             Stop-Process -name smartscreen -force -ErrorAction SilentlyContinue
         }
     }
@@ -557,26 +533,14 @@ function RegSetDwords ($hive, $key, [array]$values, [array]$dword, $REG_TYPE = 4
 defeatMsMpEng
 '@
 $script = New-Item "$env:TEMP\DefeatDefend.ps1" -Value $code -Force
-$run = "Start-Process powershell.exe -Verb RunAs -ArgumentList '-ExecutionPolicy Bypass -File `"$($script.FullName)`"'"
+$run = "& powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$($script.FullName)`""
 
-Write-Host "############################################################" -ForegroundColor Magenta
-Write-Host "#                                                          #" -ForegroundColor Magenta
-Write-Host "#       NOVA: OPTIMIZING WINDOWS DEFENDER...               #" -ForegroundColor White
-Write-Host "#       PLEASE DO NOT CLOSE THIS WINDOW!                   #" -ForegroundColor Yellow
-Write-Host "#                                                          #" -ForegroundColor Magenta
-Write-Host "#       The system will finish configuration shortly.      #" -ForegroundColor White
-Write-Host "#                                                          #" -ForegroundColor Magenta
-Write-Host "############################################################" -ForegroundColor Magenta
-Write-Host ""
-
-#disable notifications and others that are allowed while defender is running
 Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows Defender Security Center\Notifications' /v 'DisableEnhancedNotifications' /t REG_DWORD /d '1' /f *>$null
 Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows Defender Security Center\Notifications' /v 'DisableNotifications' /t REG_DWORD /d '1' /f *>$null
 Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows Defender Security Center\Virus and threat protection' /v 'SummaryNotificationDisabled' /t REG_DWORD /d '1' /f *>$null
 Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows Defender Security Center\Virus and threat protection' /v 'NoActionNotificationDisabled' /t REG_DWORD /d '1' /f *>$null
 Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows Defender Security Center\Virus and threat protection' /v 'FilesBlockedNotificationDisabled' /t REG_DWORD /d '1' /f *>$null
 Reg.exe add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Notifications\Settings\Windows.SystemToast.SecurityAndMaintenance' /v 'Enabled' /t REG_DWORD /d '0' /f *>$null
-#exploit protection
 Run-Trusted -command "Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows Defender' /v 'PUAProtection' /t REG_DWORD /d '0' /f"
 Run-Trusted -command "Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' /v 'SmartScreenEnabled' /t REG_SZ /d 'Off' /f"
 Run-Trusted -command "Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' /v 'AicEnabled' /t REG_SZ /d 'Anywhere' /f"
@@ -595,11 +559,10 @@ foreach ($file in $files) {
   Start-Sleep 1
 }
 
-$command = 'Stop-Process MpDefenderCoreService -Force; Stop-Process smartscreen -Force; Stop-Process SecurityHealthService -Force; Stop-Process SecurityHealthSystray -Force; Stop-Service -Name wscsvc -Force; Stop-Service -Name Sense -Force; Rename-item -path C:\Windows\System32\smartscreen.exe -newname smartscreen.exee -force -erroraction silentlycontinue'
+$command = 'Stop-Process -Name MpDefenderCoreService -Force -ErrorAction SilentlyContinue; Stop-Process -Name smartscreen -Force -ErrorAction SilentlyContinue; Stop-Process -Name SecurityHealthService -Force -ErrorAction SilentlyContinue; Stop-Process -Name SecurityHealthSystray -Force -ErrorAction SilentlyContinue; Stop-Service -Name wscsvc -Force -ErrorAction SilentlyContinue; Stop-Service -Name Sense -Force -ErrorAction SilentlyContinue'
 Run-Trusted -command $command
 Run-Trusted -command $run
 
-#disable tasks
 $tasks = Get-ScheduledTask
 foreach ($task in $tasks) {
   if ($task.Taskname -like 'Windows Defender*') {
