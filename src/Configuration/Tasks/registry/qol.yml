@@ -3,14 +3,18 @@ description: Small tweaks to improve usability
 actions:
   # Decrease Shutdown Time
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control', value: 'WaitToKillServiceTimeout', type: REG_SZ, data: '2000'}
-  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control', value: 'WaitToKillService', type: REG_SZ, data: '2000'}
-  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control', value: 'HungAppTimeout', type: REG_SZ, data: '2000'}
-  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control', value: 'AutoEndTasks', type: REG_SZ, data: '1'}
+  - !registryValue: {path: 'HKCU\Control Panel\Desktop', value: 'WaitToKillAppTimeout', type: REG_SZ, data: '2000'}
+  - !registryValue: {path: 'HKCU\Control Panel\Desktop', value: 'HungAppTimeout', type: REG_SZ, data: '2000'}
+  - !registryValue: {path: 'HKCU\Control Panel\Desktop', value: 'AutoEndTasks', type: REG_SZ, data: '1'}
 
   # Disabling Mouse Acceleration
   - !registryValue: {path: 'HKCU\Control Panel\Mouse', value: 'MouseSpeed', type: REG_SZ, data: '0'}
   - !registryValue: {path: 'HKCU\Control Panel\Mouse', value: 'MouseThreshold1', type: REG_SZ, data: '0'}
   - !registryValue: {path: 'HKCU\Control Panel\Mouse', value: 'MouseThreshold2', type: REG_SZ, data: '0'}
+
+  # Setting Keyboard Repeat Delay to Short
+  - !registryValue: {path: 'HKCU\Control Panel\Keyboard', value: 'KeyboardDelay', type: REG_SZ, data: '0'}
+  - !registryValue: {path: 'HKU\.DEFAULT\Control Panel\Keyboard', value: 'KeyboardDelay', type: REG_SZ, data: '0'}
 
   # Removing the suffix “- Shortcut” when creating a shortcut
   - !registryValue: {path: 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\NamingTemplates', value: 'ShortcutNameTemplate', type: REG_SZ, data: '"%s.lnk"'}
@@ -44,7 +48,7 @@ actions:
   # Disabling the Ease of Access sounds and warnings upon activation, such as the infamous Sticky Keys sound.
   - !registryValue: {path: 'HKCU\Control Panel\Accessibility', value: 'Warning Sounds', type: REG_DWORD, data: '0'}
   - !registryValue: {path: 'HKCU\Control Panel\Accessibility', value: 'Sound on Activation', type: REG_DWORD, data: '0'}
-  - !registryValue: {path: 'HKCU\Control Panel\Accessibility', value: 'WindowsEffect ', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKCU\Control Panel\Accessibility', value: 'WindowsEffect', type: REG_DWORD, data: '0'}
 
   # Add .pow File Association
   - !registryValue: {path: 'HKCR\.pow', value: 'FriendlyTypeName', type: REG_SZ, data: 'Power Plan'}

@@ -1,15 +1,17 @@
+$ErrorActionPreference = 'SilentlyContinue'
+
 $removeDirs = @(
-    'C:\inetpub'
-    'C:\PerfLogs'
+    'C:\inetpub',
+    'C:\PerfLogs',
     'C:\Windows.old'
 )
 
 $clearDirs = @(
-    'C:\Windows\Temp'
-    'C:\Windows\Prefetch'
-    'C:\Windows\Logs\CBS'
-    'C:\Windows\Logs\DISM'
-    "$env:windir\SoftwareDistribution\Download"
+    'C:\Windows\Temp',
+    'C:\Windows\Prefetch',
+    'C:\Windows\Logs\CBS',
+    'C:\Windows\Logs\DISM',
+    "$env:windir\SoftwareDistribution\Download",
     "$env:ProgramData\Microsoft\Windows\WER"
 )
 
@@ -19,11 +21,15 @@ foreach ($svc in $services) {
 }
 
 foreach ($dir in $removeDirs) {
-    if (Test-Path $dir) { Remove-Item $dir -Recurse -Force -ErrorAction SilentlyContinue }
+    if (Test-Path -LiteralPath $dir) { 
+        Remove-Item -LiteralPath $dir -Recurse -Force -ErrorAction SilentlyContinue 
+    }
 }
 
 foreach ($dir in $clearDirs) {
-    if (Test-Path $dir) { Remove-Item "$dir\*" -Recurse -Force -ErrorAction SilentlyContinue }
+    if (Test-Path -LiteralPath $dir) { 
+        Remove-Item -Path "$dir\*" -Recurse -Force -ErrorAction SilentlyContinue 
+    }
 }
 
 wevtutil el | ForEach-Object { wevtutil cl "$_" 2>$null }
@@ -34,7 +40,7 @@ foreach ($svc in $services) {
     Start-Service -Name $svc -ErrorAction SilentlyContinue 
 }
 
-Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches' -ErrorAction SilentlyContinue | ForEach-Object {
+Get-ChildItem -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches' -ErrorAction SilentlyContinue | ForEach-Object {
     Set-ItemProperty -Path $_.PSPath -Name 'StateFlags0050' -Type DWord -Value 2 -Force -ErrorAction SilentlyContinue
 }
 

@@ -49,23 +49,7 @@ actions:
   - !appx: {name: '*PinningConfirmationDialog*', type: family}
 
   # Removing Xbox
-  - !appx: {name: '*Microsoft.GamingApp*', type: family, option: uninstall-xbox}
-  - !appx: {name: '*Microsoft.Xbox*', type: family, option: uninstall-xbox}
-  - !appx: {name: '*Microsoft.GamingServices*', type: family, option: uninstall-xbox}
-  - !appx: {name: '*Microsoft.XboxGameCallableUI*', type: family, option: uninstall-xbox}
-  - !appx: {name: '*Microsoft.Xbox.TCUI*', type: family, option: uninstall-xbox}
-  - !appx: {name: '*Microsoft.XboxApp*', type: family, option: uninstall-xbox}
-  - !appx: {name: '*Microsoft.XboxGameOverlay*', type: family, option: uninstall-xbox}
-  - !appx: {name: '*Microsoft.XboxGamingOverlay*', type: family, option: uninstall-xbox}
-  - !appx: {name: '*Microsoft.XboxIdentityProvider*', type: family, option: uninstall-xbox}
-  - !appx: {name: '*Microsoft.XboxSpeechToTextOverlay*', type: family, option: uninstall-xbox}
-
-  - !service: {name: 'XblAuthManager', operation: change, startup: 4, option: uninstall-xbox}
-  - !service: {name: 'XblGameSave', operation: change, startup: 4, option: uninstall-xbox}
-  - !service: {name: 'XboxGipSvc', operation: change, startup: 4, option: uninstall-xbox}
-  - !service: {name: 'XboxNetApiSvc', operation: change, startup: 4, option: uninstall-xbox}
-
-  - !scheduledTask: {path: '\Microsoft\Windows\XblGameSave\XblGameSaveTask', operation: delete, option: uninstall-xbox}
+  - !powerShell: {command: '.\GAMEBAR.ps1 -UninstallXbox', exeDir: true, wait: true, option: uninstall-xbox}
 
   # Other 
   - !appx: {name: '*WindowsBackup*', type: app}

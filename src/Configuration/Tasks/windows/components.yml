@@ -34,7 +34,7 @@ actions:
   - !file: {path: '%SystemRoot%\System32\MicrosoftEdgeBCHost.exe', option: uninstall-edge}
   - !file: {path: '%SystemRoot%\SysWOW64\MicrosoftEdgeCP.exe', option: uninstall-edge}
   - !file: {path: '%SystemRoot%\SysWOW64\MicrosoftEdgeSH.exe', option: uninstall-edge}
-  - !file: {path: '%SystemRoot%\SysWOW64\MicrosoftEdgeBCHost.exe, option: uninstall-edge'}
+  - !file: {path: '%SystemRoot%\SysWOW64\MicrosoftEdgeBCHost.exe', option: uninstall-edge}
 
   - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: 'TaskbarMigratedBrowserPin', operation: delete, option: uninstall-edge}
   - !registryKey: {path: 'HKLM\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate', option: uninstall-edge}
@@ -82,8 +82,6 @@ actions:
   - !registryKey: {path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft Edge', option: uninstall-edge}
   - !registryKey: {path: 'HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft Edge', option: uninstall-edge}
   - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products', value: 'MSEdge', operation: delete, option: uninstall-edge}
-  - !registryKey: {path: 'HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components\{9459C573-B17A-45AE-9F64-1857B5D58CEE}', option: uninstall-edge}
-  - !registryKey: {path: 'HKLM\SOFTWARE\WOW6432Node\Microsoft\Active Setup\Installed Components\{9459C573-B17A-45AE-9F64-1857B5D58CEE}', option: uninstall-edge}
   - !registryKey: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\msedge.exe', option: uninstall-edge}
   - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run', value: 'MicrosoftEdgeAutoLaunch', operation: delete, option: uninstall-edge}
   - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run', value: 'MicrosoftEdgeAutoLaunch', operation: delete, option: uninstall-edge}
@@ -106,14 +104,14 @@ actions:
   - !registryValue: {path: 'HKCU\SOFTWARE\Classes\.xht\OpenWithProgids', value: 'MSEdgeHTM', operation: delete, option: uninstall-edge}
   - !registryValue: {path: 'HKCU\SOFTWARE\Classes\.xhtml\OpenWithProgids', value: 'MSEdgeHTM', operation: delete, option: uninstall-edge}
   - !registryValue: {path: 'HKCU\SOFTWARE\Classes\.webp\OpenWithProgids', value: 'MSEdgeHTM', operation: delete, option: uninstall-edge}
-  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts', value: 'MSEdgeHTM_microsoft-edge', operation: delete}
-  - !registryKey: {path: 'HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components\{9459C573-B17A-45AE-9F64-1857B5D58CEE}', option: uninstall-edge}
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts', value: 'MSEdgeHTM_microsoft-edge', operation: delete, option: uninstall-edge}
   - !registryKey: {path: 'HKCU\SOFTWARE\Microsoft\Edge', option: uninstall-edge}
 
   - !registryKey: {path: 'HKCU\SOFTWARE\Microsoft\EdgeWebView', option: uninstall-edge}
   - !file: {path: '%ProgramFiles(x86)%\\Microsoft\\EdgeWebView', option: uninstall-edge}
 
   - !run: {exeDir: true, exe: 'EDGE.bat', option: uninstall-edge}
+  - !powerShell: {command: '.\ActiveSetup.ps1 -Edge', exeDir: true, wait: true, option: uninstall-edge}
 
   # Removing OneDrive
   - !appx: {name: '*OneDrive*', type: family}
@@ -125,6 +123,7 @@ actions:
   - !service: {name: 'OneSyncSvc*', operation: delete}
 
   - !scheduledTask: {path: '\Microsoft\Windows\OneDrive\OneDrive Standalone Update Task', operation: delete}
+  - !powerShell: {command: '.\ActiveSetup.ps1 -OneDrive', exeDir: true, wait: true}
 
   - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders', value: '{0DDD015D-B06C-45D5-8C4C-F59713854639}', operation: delete}
   - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders', value: '{35286A68-3C57-41A1-BBB1-0EAE73D76C95}', operation: delete}
@@ -357,6 +356,7 @@ actions:
   - !file: {path: '%ProgramW6432%\PCHealthCheck'}
     
   # Removing AI Components
+  - !scheduledTask: {path: '\Microsoft\Windows\WindowsAI\ClickToDo', operation: deleteFolder}
   - !scheduledTask: {path: '\Microsoft\Windows\WindowsAI\Recall', operation: deleteFolder}
   - !scheduledTask: {path: '\Microsoft\Windows\WindowsAI\Settings', operation: deleteFolder}
   - !scheduledTask: {path: '\Microsoft\Windows\WindowsAI', operation: deleteFolder}
@@ -371,6 +371,7 @@ actions:
 
   - !service: {name: 'WSAIFabricSvc', operation: delete}
 
+  - !appx: {name: '*MicrosoftWindows.Client.CoreAI*', type: family}
   - !appx: {name: '*MicrosoftWindows.Client.AIX*', type: family}
   - !appx: {name: '*Microsoft.Copilot*', type: family}
   - !appx: {name: '*Microsoft.Windows.Copilot*', type: family}
@@ -410,6 +411,7 @@ actions:
   - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge', value: 'GenAILocalFoundationalModelSettings', type: REG_DWORD, data: '1'}
   - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Notifications\Settings', value: 'AutoOpenCopilotLargeScreens', type: REG_DWORD, data: '0'}
   - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\generativeAI', value: 'Value', type: REG_SZ, data: 'Deny'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\systemAIModels', value: 'Value', type: REG_SZ, data: 'Deny'}
   - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy', value: 'LetAppsAccessGenerativeAI', type: REG_DWORD, data: '2'}
   - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy', value: 'LetAppsAccessSystemAIModels', type: REG_DWORD, data: '2'}
   - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsCopilot', value: 'AllowCopilotRuntime', type: REG_DWORD, data: '0'}

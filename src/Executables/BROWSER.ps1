@@ -1,8 +1,10 @@
-﻿param (
+param (
     [switch]$Chrome,
     [switch]$Brave,
     [switch]$Firefox,
     [switch]$LibreWolf,
+    [switch]$Helium,
+    [switch]$Zen,
     [switch]$Edge,
     [switch]$uBlock
 )
@@ -214,6 +216,35 @@ if ($Brave) {
 
 if ($Firefox)   { 
   Write-FirefoxPolicy "$env:ProgramFiles\Mozilla Firefox" $FFPolicy 
+}
+
+if ($Zen) {
+    Write-FirefoxPolicy "$env:ProgramFiles\Zen Browser" $FFPolicy
+}
+
+if ($Helium) {
+    foreach ($dir in $AppDirTargets) {
+        $userDir = Join-Path $dir 'imput\Helium\User Data'
+        Write-Profile "$userDir\Default\Preferences" @'
+{
+  "privacy_sandbox": { "m1": { "ad_measurement_enabled": false, "fledge_enabled": false, "topics_enabled": false, "row_notice_acknowledged": true } },
+  "privacy_guide": { "viewed": true },
+  "signin": { "allowed_on_next_startup": false },
+  "extensions": { "ui": { "developer_mode": true } }
+}
+'@
+        Write-Profile "$userDir\Local State" $ChromState
+    }
+
+    Write-BrowserPolicy 'HKLM\SOFTWARE\Policies\Helium' @{
+        MetricsReportingEnabled                 = 0
+        PrivacySandboxPromptEnabled             = 0
+        UrlKeyedAnonymizedDataCollectionEnabled = 0
+        WebRtcEventLogCollectionAllowed         = 0
+        CloudReportingEnabled                   = 0
+        SafeBrowsingExtendedReportingEnabled    = 0
+        WebRtcMultipleRoutesEnabled             = 0
+    }
 }
 
 if ($Edge) {

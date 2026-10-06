@@ -1,26 +1,44 @@
-# PowerShell script to disable Windows power management on devices (MSPower_DeviceEnable)
-# For desktops: globally disables idle sleep states for all PCIe/USB devices (ASPM/D3 blocks) to minimize stutters.
-# For laptops: only prevents Windows from turning off connected serial ports to save power.
+# PowerShell script to disable Windows power management on USB devices
 
 $ErrorActionPreference = 'SilentlyContinue'
 
-$isLaptop = [bool]((Get-CimInstance -ClassName Win32_SystemEnclosure).ChassisTypes -match '^(8|9|10|11|12|14|18|21|30|31|32)$')
+$chassisTypes = (Get-CimInstance -ClassName Win32_SystemEnclosure -ErrorAction SilentlyContinue).ChassisTypes
+$laptopTypes = 8..12 + 14 + 18 + 21 + 30..32
+$isLaptop = $false
+foreach ($type in $chassisTypes) {
+    if ($type -in $laptopTypes) {
+        $isLaptop = $true
+        break
+    }
+}
 
 if (-not $isLaptop) {
-    Get-CimInstance -Namespace "root\wmi" -ClassName "MSPower_DeviceEnable" | ForEach-Object {
-        Set-CimInstance -InputObject $_ -Property @{Enable = $false}
+    Get-CimInstance -Namespace "root\wmi" -ClassName "MSPower_DeviceEnable" -ErrorAction SilentlyContinue | ForEach-Object {
+        Set-CimInstance -InputObject $_ -Property @{ Enable = $false } -ErrorAction SilentlyContinue
+    }
+    Get-ChildItem 'HKLM:\SYSTEM\CurrentControlSet\Enum\USB' -Recurse -ErrorAction SilentlyContinue | ForEach-Object {
+        if ($_.PSChildName -eq 'Device Parameters') {
+            Set-ItemProperty -Path $_.PSPath -Name SelectiveSuspendEnabled -Type DWord -Value 0 -Force -ErrorAction SilentlyContinue
+            Set-ItemProperty -Path $_.PSPath -Name AllowIdleIrpInD3 -Type DWord -Value 0 -Force -ErrorAction SilentlyContinue
+            Set-ItemProperty -Path $_.PSPath -Name DeviceSelectiveSuspended -Type DWord -Value 0 -Force -ErrorAction SilentlyContinue
+            Set-ItemProperty -Path $_.PSPath -Name EnhancedPowerManagementEnabled -Type DWord -Value 0 -Force -ErrorAction SilentlyContinue
+        }
+        elseif ($_.PSChildName -eq 'Wdf') {
+            Set-ItemProperty -Path $_.PSPath -Name IdleInWorkingState -Type DWord -Value 0 -Force -ErrorAction SilentlyContinue
+            Set-ItemProperty -Path $_.PSPath -Name WdfDefaultIdleInWorkingState -Type DWord -Value 0 -Force -ErrorAction SilentlyContinue
+            Set-ItemProperty -Path $_.PSPath -Name WdfDirectedPowerTransitionEnable -Type DWord -Value 0 -Force -ErrorAction SilentlyContinue
+        }
     }
 } else {
-    $hubs = Get-CimInstance -ClassName Win32_SerialPort | Select-Object Name, DeviceID, Description, PNPDeviceID
-    $powerMgmt = Get-CimInstance -ClassName MSPower_DeviceEnable -Namespace root\wmi
+    $hubs = Get-CimInstance -ClassName Win32_PnPEntity -ErrorAction SilentlyContinue | Where-Object { $_.PNPClass -eq 'Ports' -or $_.PNPClass -eq 'USB' }
+    $powerMgmt = Get-CimInstance -Namespace "root\wmi" -ClassName "MSPower_DeviceEnable" -ErrorAction SilentlyContinue
 
     if ($null -ne $powerMgmt -and $null -ne $hubs) {
         foreach ($p in $powerMgmt) {
-            $IN = $p.InstanceName.ToUpper()
+            $instanceUpper = $p.InstanceName.ToUpper()
             foreach ($h in $hubs) {
-                $PNPDI = $h.PNPDeviceID
-                if ($IN -like "*$PNPDI*") {
-                    Set-CimInstance -InputObject $p -Property @{Enable = $false}
+                if ($null -ne $h.PNPDeviceID -and $instanceUpper -like "*$($h.PNPDeviceID.ToUpper())*") {
+                    Set-CimInstance -InputObject $p -Property @{ Enable = $false } -ErrorAction SilentlyContinue
                 }
             }
         }

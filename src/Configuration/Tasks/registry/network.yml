@@ -5,12 +5,15 @@ actions:
   - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient', value: 'EnableMulticast', type: REG_DWORD, data: '0'}
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters', value: 'EnableMulticast', type: REG_DWORD, data: '0'}
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Services\NetBT\Parameters', value: 'EnableLMHOSTS', type: REG_DWORD, data: '0'}
-  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Services\NetBT\Parameters\Interfaces', value: 'NetbiosOptions', type: REG_DWORD, data: '2'}
   - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad', value: 'WpadOverride', type: REG_DWORD, data: '1'}
-  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad', value: 'WpadOverride', type: REG_DWORD, data: '1'}
 
-  # TCP Receive Window auto-tuning
-  - !run: {exe: 'netsh', args: 'int tcp set global autotuninglevel=normal'}
+  - !powerShell:
+      command: |
+        Get-ChildItem 'HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters\Interfaces' | ForEach-Object {
+            Set-ItemProperty -Path $_.PSPath -Name 'NetbiosOptions' -Type DWord -Value 2 -Force
+        }
+      runas: currentUserElevated
+      wait: true
 
   # Parallel network processing
   - !run: {exe: 'netsh', args: 'int tcp set global rss=enabled'}
@@ -18,39 +21,12 @@ actions:
   # Disabling packet coalescing 
   - !run: {exe: 'netsh', args: 'int tcp set global rsc=disabled'}
 
-  # Disabling TCP Timestamps 
-  - !run: {exe: 'netsh', args: 'int tcp set global timestamps=disabled'}
-
   # Speed up initial connection setup
   - !run: {exe: 'netsh', args: 'int tcp set global fastopen=enabled'}
   - !run: {exe: 'netsh', args: 'int tcp set global fastopenfallback=enabled'}
 
-  # Proportional rate reduction 
-  - !run: {exe: 'netsh', args: 'int tcp set global prr=enabled'}
-  
   # Disabling TCP heuristics 
-  - !run: {exe: 'netsh', args: 'int tcp set heuristics wsh=disabled'}
   - !run: {exe: 'netsh', args: 'int tcp set heuristics forcews=disabled'}
-
-  # Disabling memory pressure protection
-  - !run: {exe: 'netsh', args: 'int tcp set security mpp=disabled'}
-
-  # Disabling security profiles
-  - !run: {exe: 'netsh', args: 'int tcp set security profiles=disabled'}
-
-  # Fixing loopback bug for BBR2 
-  - !run: {exe: 'netsh', args: 'int ipv4 set gl loopbacklargemtu=disabled'}
-
-  # Modern congestion control
-  - !run: {exe: 'netsh', args: 'int tcp set supplemental internet congestionprovider=bbr2'}
-  - !run: {exe: 'netsh', args: 'int tcp set supplemental internetcustom congestionprovider=bbr2'}
-  - !run: {exe: 'netsh', args: 'int tcp set supplemental datacenter congestionprovider=bbr2'}
-  - !run: {exe: 'netsh', args: 'int tcp set supplemental datacentercustom congestionprovider=bbr2'}
-  - !run: {exe: 'netsh', args: 'int tcp set supplemental compat congestionprovider=bbr2'}
-
-  # Modern loss detection and recovery
-  - !run: {exe: 'netsh', args: 'int tcp set supplemental template=Internet rack=enabled'}
-  - !run: {exe: 'netsh', args: 'int tcp set supplemental template=Internet taillossprobe=enabled'}
 
   # Disabling UDP batching
   - !run: {exe: 'netsh', args: 'int udp set global uro=disabled'}
@@ -60,22 +36,3 @@ actions:
 
   # Checksum offload
   - !run: {exe: 'netsh', args: 'int ipv4 set global taskoffload=enabled'}
-
-  # Enable QoS in system
-  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\QoS', value: 'Do not use NLA', type: REG_SZ, data: '1'}
-  
-  - !powerShell: {command: 'New-NetQosPolicy -Name "CS2" -AppPathNameMatchCondition "cs2.exe" -DSCPAction 46 -Precedence 127 -ErrorAction SilentlyContinue'}
-  - !powerShell: {command: 'New-NetQosPolicy -Name "Valorant" -AppPathNameMatchCondition "VALORANT-Win64-Shipping.exe" -DSCPAction 46 -Precedence 127 -ErrorAction SilentlyContinue'}
-  - !powerShell: {command: 'New-NetQosPolicy -Name "Apex" -AppPathNameMatchCondition "r5apex_dx12.exe" -DSCPAction 46 -Precedence 127 -ErrorAction SilentlyContinue'}
-  - !powerShell: {command: 'New-NetQosPolicy -Name "Fortnite" -AppPathNameMatchCondition "FortniteClient-Win64-Shipping.exe" -DSCPAction 46 -Precedence 127 -ErrorAction SilentlyContinue'}
-  - !powerShell: {command: 'New-NetQosPolicy -Name "CoD" -AppPathNameMatchCondition "cod.exe" -DSCPAction 46 -Precedence 127 -ErrorAction SilentlyContinue'}
-  - !powerShell: {command: 'New-NetQosPolicy -Name "Overwatch2" -AppPathNameMatchCondition "Overwatch.exe" -DSCPAction 46 -Precedence 127 -ErrorAction SilentlyContinue'}
-  - !powerShell: {command: 'New-NetQosPolicy -Name "R6Siege" -AppPathNameMatchCondition "RainbowSix.exe" -DSCPAction 46 -Precedence 127 -ErrorAction SilentlyContinue'}
-  - !powerShell: {command: 'New-NetQosPolicy -Name "Dota2" -AppPathNameMatchCondition "dota2.exe" -DSCPAction 46 -Precedence 127 -ErrorAction SilentlyContinue'}
-  - !powerShell: {command: 'New-NetQosPolicy -Name "League" -AppPathNameMatchCondition "League of Legends.exe" -DSCPAction 46 -Precedence 127 -ErrorAction SilentlyContinue'}
-  - !powerShell: {command: 'New-NetQosPolicy -Name "PUBG" -AppPathNameMatchCondition "TslGame.exe" -DSCPAction 46 -Precedence 127 -ErrorAction SilentlyContinue'}
-  - !powerShell: {command: 'New-NetQosPolicy -Name "EFT" -AppPathNameMatchCondition "EscapeFromTarkov.exe" -DSCPAction 46 -Precedence 127 -ErrorAction SilentlyContinue'}
-  - !powerShell: {command: 'New-NetQosPolicy -Name "Rust" -AppPathNameMatchCondition "RustClient.exe" -DSCPAction 46 -Precedence 127 -ErrorAction SilentlyContinue'}
-  - !powerShell: {command: 'New-NetQosPolicy -Name "Minecraft" -AppPathNameMatchCondition "javaw.exe" -DSCPAction 46 -Precedence 127 -ErrorAction SilentlyContinue'}
-  - !powerShell: {command: 'New-NetQosPolicy -Name "TheFinals" -AppPathNameMatchCondition "Discovery.exe" -DSCPAction 46 -Precedence 127 -ErrorAction SilentlyContinue'}
-  - !powerShell: {command: 'New-NetQosPolicy -Name "Battlefield" -AppPathNameMatchCondition "BF2042.exe" -DSCPAction 46 -Precedence 127 -ErrorAction SilentlyContinue'}

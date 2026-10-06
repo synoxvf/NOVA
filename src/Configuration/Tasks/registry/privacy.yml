@@ -74,6 +74,8 @@ actions:
   - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search', value: 'AllowSearchToUseLocation', type: REG_DWORD, data: '0'}
   - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search', value: 'EnableDynamicContentInWSB', type: REG_DWORD, data: '0'}
   - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search', value: 'ConnectedSearchUseWeb', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search', value: 'DisableWebSearch', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKCU\Software\Microsoft\Windows\CurrentVersion\Search', value: 'BingSearchEnabled', type: REG_DWORD, data: '0'}
   - !registryValue: {path: 'HKCU\Software\Policies\Microsoft\Windows\Explorer', value: 'DisableSearchBoxSuggestions', type: REG_DWORD, data: '1'}
   - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\input\Settings', value: 'InsightsEnabled', type: REG_DWORD, data: '0'}
 
@@ -172,6 +174,8 @@ actions:
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Lsa', value: 'RestrictAnonymous', type: REG_DWORD, data: '1'}
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters', value: 'RestrictNullSessAccess', type: REG_DWORD, data: '1'}
   - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client', value: 'AllowBasic', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Lsa', value: 'RunAsPPL', type: REG_DWORD, data: '2'}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest', value: 'UseLogonCredential', type: REG_DWORD, data: '0'}
   - !powerShell:
     command: |
       $legacyFeatures = @(
@@ -222,6 +226,7 @@ actions:
   - !registryValue: {path: 'HKLM\Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\gazeInput', value: 'Value', type: REG_SZ, data: 'Deny'}
   - !registryValue: {path: 'HKLM\Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\graphicsCaptureProgrammatic', value: 'Value', type: REG_SZ, data: 'Deny'}
   - !registryValue: {path: 'HKLM\Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\graphicsCaptureWithoutBorder', value: 'Value', type: REG_SZ, data: 'Deny'}
+  - !registryValue: {path: 'HKLM\Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\humanPresence', value: 'Value', type: REG_SZ, data: 'Deny'}
   - !registryValue: {path: 'HKLM\Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location', value: 'Value', type: REG_SZ, data: 'Deny'}
   - !registryValue: {path: 'HKLM\Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\musicLibrary', value: 'Value', type: REG_SZ, data: 'Deny'}
   - !registryValue: {path: 'HKLM\Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\phoneCall', value: 'Value', type: REG_SZ, data: 'Deny'}
@@ -230,11 +235,15 @@ actions:
   - !registryValue: {path: 'HKLM\Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\userDataTasks', value: 'Value', type: REG_SZ, data: 'Deny'}
   - !registryValue: {path: 'HKLM\Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\userNotificationListener', value: 'Value', type: REG_SZ, data: 'Deny'}
   - !registryValue: {path: 'HKLM\Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\videosLibrary', value: 'Value', type: REG_SZ, data: 'Deny'}
+  - !registryValue: {path: 'HKLM\Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\generativeAI', value: 'Value', type: REG_SZ, data: 'Deny'}
+  - !registryValue: {path: 'HKLM\Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\systemAIModels', value: 'Value', type: REG_SZ, data: 'Deny'}
 
-  # Disabling telemetry-specific diagnostic tracing (Autologgers)
+  # Disabling telemetry-specific diagnostic tracing (Autologgers & ETW Event Channels)
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\WMI\Autologger\Diagtrack-Listener', value: 'Start', data: '0', type: REG_DWORD}
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\WMI\Autologger\Diaglog', value: 'Start', data: '0', type: REG_DWORD}
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\WMI\Autologger\SQMLogger', value: 'Start', data: '0', type: REG_DWORD}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WINEVT\Channels\Microsoft-Windows-Application-Experience/Program-Telemetry', value: 'Enabled', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WINEVT\Channels\Microsoft-Windows-UniversalTelemetryClient/Operational', value: 'Enabled', type: REG_DWORD, data: '0'}
 
   # Disabling Wi‑Fi Sense
   - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WcmSvc\wifinetworkmanager\config', value: 'AutoConnectAllowedOEM', type: REG_DWORD, data: '0'}
@@ -254,8 +263,13 @@ actions:
 
   # Disabling Tasks
   - !scheduledTask: {path: '\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser', operation: disable, ignoreErrors: true}
+  - !scheduledTask: {path: '\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser Exp', operation: disable, ignoreErrors: true}
+  - !scheduledTask: {path: '\Microsoft\Windows\Application Experience\MareBackup', operation: disable, ignoreErrors: true}
   - !scheduledTask: {path: '\Microsoft\Windows\Application Experience\PcaPatchDbTask', operation: disable, ignoreErrors: true}
   - !scheduledTask: {path: '\Microsoft\Windows\Application Experience\ProgramDataUpdater', operation: disable, ignoreErrors: true}
+  - !scheduledTask: {path: '\Microsoft\Windows\Application Experience\SdbinstMergeDbTask', operation: disable, ignoreErrors: true}
+  - !scheduledTask: {path: '\Microsoft\Windows\Sustainability\PowerGridForecastTask', operation: disable, ignoreErrors: true}
+  - !scheduledTask: {path: '\Microsoft\Windows\Sustainability\SustainabilityTelemetry', operation: disable, ignoreErrors: true}
   - !scheduledTask: {path: '\Microsoft\Windows\Autochk\Proxy', operation: disable, ignoreErrors: true}
   - !scheduledTask: {path: '\Microsoft\Windows\Customer Experience Improvement Program\Consolidator', operation: disable, ignoreErrors: true}
   - !scheduledTask: {path: '\Microsoft\Windows\Customer Experience Improvement Program\KernelCeipTask', operation: disable, ignoreErrors: true}

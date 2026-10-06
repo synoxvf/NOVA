@@ -1,3 +1,8 @@
+[CmdletBinding()]
+param(
+    [string]$SimulatedProcessorName
+)
+
 # Writes CPU topology-specific performance overrides into the imported NOVA scheme.
 
 $ErrorActionPreference = 'Stop'
@@ -25,15 +30,23 @@ function Invoke-PowerCfg {
 
 Invoke-PowerCfg -Arguments @('/query', $novaGuid)
 
-$cpu = Get-CimInstance -ClassName Win32_Processor -ErrorAction Stop |
-    Select-Object -First 1
-if ($null -eq $cpu) {
-    throw 'Win32_Processor did not return a CPU.'
+$name = ''
+$isIntel = $false
+if ($SimulatedProcessorName) {
+    $name = $SimulatedProcessorName.Trim()
+    $isIntel = $name -match 'Intel'
+} else {
+    $cpu = Get-CimInstance -ClassName Win32_Processor -ErrorAction Stop |
+        Select-Object -First 1
+    if ($null -eq $cpu) {
+        throw 'Win32_Processor did not return a CPU.'
+    }
+    $name = $cpu.Name.Trim()
+    $isIntel = $cpu.Manufacturer -match 'Intel'
 }
 
-$name = $cpu.Name.Trim()
-$isIntel = $cpu.Manufacturer -match 'Intel'
 $isLockedIntel = $isIntel -and ($name -notmatch '(?i)\b\d{3,5}\s*(K|KF|KS|X|XE)\b')
+$isDualCcdX3D = ($name -match 'Ryzen.*(7900X3D|7950X3D|9900X3D|9950X3D)' -or ($name -match 'Ryzen\s+9' -and $name -match 'X3D'))
 
 if (-not ([System.Management.Automation.PSTypeName]'CpuTopology').Type) {
     Add-Type -TypeDefinition @'
@@ -60,11 +73,41 @@ public static class CpuTopology {
             return seen.Count;
         } finally { Marshal.FreeHGlobal(buf); }
     }
+    public static bool HasAsymmetricL3() {
+        uint len = 0;
+        GetLogicalProcessorInformationEx(2, IntPtr.Zero, ref len);
+        if (len == 0) return false;
+        IntPtr buf = Marshal.AllocHGlobal((int)len);
+        try {
+            if (!GetLogicalProcessorInformationEx(2, buf, ref len)) return false;
+            var l3Sizes = new HashSet<uint>();
+            long p = buf.ToInt64(); long end = p + len;
+            while (p < end) {
+                int rel = Marshal.ReadInt32((IntPtr)p);
+                int size = Marshal.ReadInt32((IntPtr)(p + 4));
+                if (rel == 2) {
+                    byte level = Marshal.ReadByte((IntPtr)(p + 8));
+                    uint cacheSize = (uint)Marshal.ReadInt32((IntPtr)(p + 12));
+                    if (level == 3) {
+                        l3Sizes.Add(cacheSize);
+                    }
+                }
+                p += size;
+            }
+            return l3Sizes.Count > 1;
+        } finally { Marshal.FreeHGlobal(buf); }
+    }
 }
 '@
 }
 $efficiencyClasses = [CpuTopology]::EfficiencyClasses()
 $isHybrid = $efficiencyClasses -gt 1
+if (-not $isHybrid -and $SimulatedProcessorName -and ($name -match '(?i)\b(12|13|14)\d{3}|Ultra')) {
+    $isHybrid = $true
+}
+if (-not $isDualCcdX3D -and -not $SimulatedProcessorName) {
+    $isDualCcdX3D = [CpuTopology]::HasAsymmetricL3()
+}
 
 function Set-Idx {
     param(
@@ -87,10 +130,14 @@ function Set-Idx {
 if ($isLockedIntel) {
     Set-Idx '06cadf0e-64ed-448a-8927-ce7bf90eb35d' 1 1
     Set-Idx '06cadf0e-64ed-448a-8927-ce7bf90eb35e' 1 1
+    Set-Idx '12a0ab44-fe28-4fa9-b3bd-4b64f44960a6' 1 1
+    Set-Idx '12a0ab44-fe28-4fa9-b3bd-4b64f44960a7' 1 1
     Set-Idx '4b92d758-5a24-4851-a470-815d78aee119' 1 1
 } else {
     Set-Idx '06cadf0e-64ed-448a-8927-ce7bf90eb35d' 0 0
     Set-Idx '06cadf0e-64ed-448a-8927-ce7bf90eb35e' 0 0
+    Set-Idx '12a0ab44-fe28-4fa9-b3bd-4b64f44960a6' 0 0
+    Set-Idx '12a0ab44-fe28-4fa9-b3bd-4b64f44960a7' 0 0
 }
 
 if ($isHybrid) {
@@ -101,10 +148,20 @@ if ($isHybrid) {
     Set-Idx '2430ab6f-a520-44a2-9601-f7f23b5134b1' 100 0
     Set-Idx 'f735a673-2066-4f80-a0c5-ddee0cf1bf5d' 100 0
     Set-Idx '6788488b-1b90-4d11-8fa7-973e470dff47' 100 100
-    Set-Idx '69439b22-221b-4830-bd34-f7bcece24583' 100 100
-    Set-Idx '0cc5b647-c1df-4637-891a-dec35c318584' 100 50
+    Set-Idx '69439b22-221b-4830-bd34-f7bcece24583' 100 10
+    Set-Idx '0cc5b647-c1df-4637-891a-dec35c318584' 50  50
     Set-Idx '828423eb-8662-4344-90f7-52bf15870f5a' 255 255
     Set-Idx 'bf903d33-9d24-49d3-a468-e65e0325046a' 255 255
+}
+
+if ($isDualCcdX3D) {
+    Set-Idx '0cc5b647-c1df-4637-891a-dec35c318583' 50  50
+    Set-Idx '616cdaa5-695e-4545-97ad-97dc2d1bdd88' 50  50
+    Set-Idx '93b8b6dc-0698-4d1c-9ee4-0644e900c85d' 2   5
+    Set-Idx 'bae08b81-2d5e-4688-ad6a-13243356654b' 2   5
+} elseif (-not $isHybrid) {
+    Set-Idx '0cc5b647-c1df-4637-891a-dec35c318583' 100 50
+    Set-Idx '616cdaa5-695e-4545-97ad-97dc2d1bdd88' 100 50
 }
 
 Invoke-PowerCfg -Arguments @('/setactive', $novaGuid)
