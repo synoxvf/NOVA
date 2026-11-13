@@ -9,16 +9,8 @@ $removeDirs = @(
 $clearDirs = @(
     'C:\Windows\Temp',
     'C:\Windows\Prefetch',
-    'C:\Windows\Logs\CBS',
-    'C:\Windows\Logs\DISM',
-    "$env:windir\SoftwareDistribution\Download",
     "$env:ProgramData\Microsoft\Windows\WER"
 )
-
-$services = @('wuauserv', 'UsoSvc', 'bits', 'dosvc')
-foreach ($svc in $services) { 
-    Stop-Service -Name $svc -ErrorAction SilentlyContinue 
-}
 
 foreach ($dir in $removeDirs) {
     if (Test-Path -LiteralPath $dir) { 
@@ -32,13 +24,9 @@ foreach ($dir in $clearDirs) {
     }
 }
 
-wevtutil el | ForEach-Object { wevtutil cl "$_" 2>$null }
+# Preserve event/CBS/DISM logs and update caches for AppX diagnosis.
+# Do not stop delivery services or purge payloads while OOBE/Store is deploying apps.
 Clear-RecycleBin -Force -ErrorAction SilentlyContinue
-Delete-DeliveryOptimizationCache -Force -ErrorAction SilentlyContinue
-
-foreach ($svc in $services) { 
-    Start-Service -Name $svc -ErrorAction SilentlyContinue 
-}
 
 Get-ChildItem -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches' -ErrorAction SilentlyContinue | ForEach-Object {
     Set-ItemProperty -Path $_.PSPath -Name 'StateFlags0050' -Type DWord -Value 2 -Force -ErrorAction SilentlyContinue

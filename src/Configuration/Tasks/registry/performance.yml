@@ -40,7 +40,9 @@ actions:
   - !run: {exe: 'fsutil', args: 'behavior set disabledeletenotify 0'}
   - !run: {exe: 'fsutil', args: 'behavior set disable8dot3 1'}
   - !run: {exe: 'fsutil', args: 'behavior set encryptpagingfile 0'}
-  - !run: {exe: 'fsutil', args: 'behavior set disablecompression 1'}
+  # Preserve AppRepository manifest compression. This alone did not resolve issue #7.
+  - !run: {exe: 'fsutil', args: 'behavior set disablecompression 0', option: '!disable-ntfs-compression'}
+  - !run: {exe: 'fsutil', args: 'behavior set disablecompression 1', option: disable-ntfs-compression}
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\FileSystem', value: 'NtfsMemoryUsage', type: REG_DWORD, data: '2'}
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\FileSystem', value: 'NtfsDisableVolsnapHints', type: REG_DWORD, data: '1'}
 
@@ -93,6 +95,6 @@ actions:
   # NGEN 
   - !powerShell: {command: '.\NGEN.ps1', exeDir: true}
 
-  # Disabling Store wake tasks
-  - !scheduledTask: {path: '\Microsoft\Windows\InstallService\WakeUpAndContinueUpdates', operation: disable, ignoreErrors: true}
-  - !scheduledTask: {path: '\Microsoft\Windows\InstallService\WakeUpAndScanForUpdates', operation: disable, ignoreErrors: true}
+  # Keep Store update tasks available, including after an older NOVA run.
+  - !scheduledTask: {path: '\Microsoft\Windows\InstallService\WakeUpAndContinueUpdates', operation: enable, ignoreErrors: true}
+  - !scheduledTask: {path: '\Microsoft\Windows\InstallService\WakeUpAndScanForUpdates', operation: enable, ignoreErrors: true}

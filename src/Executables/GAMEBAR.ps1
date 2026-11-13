@@ -128,6 +128,19 @@ function Set-UserRegistryValue {
     }
 }
 
+function Stop-XboxProcesses {
+    # Close Xbox UI processes before asking Windows to remove the packages.
+    $processes = @('XboxPcApp', 'XboxGameBar', 'GameBar', 'GameBarPresenceWriter', 'GameBarFTS', 'XboxGameBarWidgets')
+    foreach ($proc in $processes) {
+        Get-Process -Name $proc -ErrorAction SilentlyContinue | ForEach-Object {
+            try {
+                Stop-Process -Id $_.Id -Force -ErrorAction Stop
+            } catch { }
+        }
+    }
+    Start-Sleep -Seconds 2
+}
+
 function Remove-XboxAppxPackages {
     [CmdletBinding()]
     param(
@@ -136,17 +149,25 @@ function Remove-XboxAppxPackages {
 
     if ($TestMode) { return }
 
-    foreach ($pkg in $Packages) {
-        # Provisioned packages (staged for new users)
-        Get-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue | Where-Object {
-            $_.PackageName -like $pkg -or $_.DisplayName -like $pkg
-        } | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
+    Stop-XboxProcesses
+    & (Join-Path $PSScriptRoot 'APPX.ps1') -Group Xbox
+}
 
-        # Existing user packages
-        Get-AppxPackage -Name $pkg -AllUsers -ErrorAction SilentlyContinue | ForEach-Object {
-            Remove-AppxPackage -Package $_.PackageFullName -AllUsers -ErrorAction SilentlyContinue
-        }
+function Disable-XboxServices {
+    [CmdletBinding()]
+    param(
+        [string[]]$Services
+    )
+
+    if ($TestMode) { return }
+
+    foreach ($svc in $Services) {
+        Set-Service -Name $svc -StartupType Manual -ErrorAction SilentlyContinue
+        Stop-Service -Name $svc -Force -ErrorAction SilentlyContinue
     }
+
+    # Gaming Services owns its service registrations. Let the package manager
+    # remove them; leave them untouched if package removal failed.
 }
 
 if ($isDualCcdX3D) {
@@ -163,22 +184,20 @@ if ($isDualCcdX3D) {
             '*Microsoft.XboxApp*',
             '*Microsoft.XboxSpeechToTextOverlay*',
             '*Microsoft.XboxIdentityProvider*',
-            '*Microsoft.Xbox.TCUI*'
+            '*Microsoft.Xbox.TCUI*',
+            '*Microsoft.XboxGamingOverlay*',
+            '*Microsoft.XboxGameOverlay*',
+            '*Microsoft.GamingServices*',
+            '*Microsoft.Edge.GameAssist*'
         )
         $telemetry.AppxRemoved = $targetPackages
 
         Remove-XboxAppxPackages -Packages $targetPackages
 
-        $targetServices = @('XblAuthManager', 'XblGameSave', 'XboxNetApiSvc')
+        $targetServices = @('XblAuthManager', 'XblGameSave', 'XboxGipSvc', 'XboxNetApiSvc')
         $telemetry.ServicesDisabled = $targetServices
 
-        if (-not $TestMode) {
-            foreach ($svc in $targetServices) {
-                Set-Service -Name $svc -StartupType Manual -ErrorAction SilentlyContinue
-                Stop-Service -Name $svc -Force -ErrorAction SilentlyContinue
-            }
-            Unregister-ScheduledTask -TaskName 'XblGameSaveTask' -TaskPath '\Microsoft\Windows\XblGameSave\' -Confirm:$false -ErrorAction SilentlyContinue
-        }
+        Disable-XboxServices -Services $targetServices
     }
 } else {
     if ($ConfigureGameBar) {
@@ -198,9 +217,7 @@ if ($isDualCcdX3D) {
     if ($UninstallXbox) {
         $targetPackages = @(
             '*Microsoft.GamingApp*',
-            '*Microsoft.Xbox*',
             '*Microsoft.GamingServices*',
-            '*Microsoft.XboxGameCallableUI*',
             '*Microsoft.Xbox.TCUI*',
             '*Microsoft.XboxApp*',
             '*Microsoft.XboxGameOverlay*',
@@ -215,13 +232,7 @@ if ($isDualCcdX3D) {
         $targetServices = @('XblAuthManager', 'XblGameSave', 'XboxGipSvc', 'XboxNetApiSvc')
         $telemetry.ServicesDisabled = $targetServices
 
-        if (-not $TestMode) {
-            foreach ($svc in $targetServices) {
-                Set-Service -Name $svc -StartupType Manual -ErrorAction SilentlyContinue
-                Stop-Service -Name $svc -Force -ErrorAction SilentlyContinue
-            }
-            Unregister-ScheduledTask -TaskName 'XblGameSaveTask' -TaskPath '\Microsoft\Windows\XblGameSave\' -Confirm:$false -ErrorAction SilentlyContinue
-        }
+        Disable-XboxServices -Services $targetServices
     }
 }
 

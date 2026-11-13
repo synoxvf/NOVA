@@ -1,2 +1,6 @@
 *.apbx
 *.apbx.tmp
+
+# Local validation dependencies and generated archives
+.work/
+dist/

@@ -19,23 +19,16 @@ for /f "usebackq tokens=2 delims=\" %%a in (`reg query "HKEY_USERS" ^| findstr /
 	)
 )
 
-for /f "usebackq delims=" %%e in (`reg query "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall" ^| findstr /i /r /c:"Microsoft[ ]*Edge" /c:"msedge"`) do reg delete "%%e" /f
 
 for /f "usebackq delims=" %%a in (`dir /b /a:d "%SystemDrive%\Users" ^| findstr /v /i /x /c:"Public" /c:"Default User" /c:"All Users"`) do (
 	echo del /q /f "%SystemDrive%\Users\%%a\Desktop\Microsoft Edge.lnk"
 	del /q /f "%SystemDrive%\Users\%%a\Desktop\Microsoft Edge.lnk"
 
-	echo rmdir /q /s "%SystemDrive%\Users\%%a\AppData\Local\Microsoft\EdgeWebView"
-	rmdir /q /s "%SystemDrive%\Users\%%a\AppData\Local\Microsoft\EdgeWebView"
 
 	echo rmdir /q /s "%SystemDrive%\Users\%%a\AppData\Local\Microsoft\Edge"
 	rmdir /q /s "%SystemDrive%\Users\%%a\AppData\Local\Microsoft\Edge"
 
-	echo rmdir /q /s "%SystemDrive%\Users\%%a\AppData\Local\Microsoft\EdgeUpdate"
-	rmdir /q /s "%SystemDrive%\Users\%%a\AppData\Local\Microsoft\EdgeUpdate"
 	
-	echo rmdir /q /s "%SystemDrive%\Users\%%a\AppData\Local\Microsoft\EdgeCore"
-	rmdir /q /s "%SystemDrive%\Users\%%a\AppData\Local\Microsoft\EdgeCore"
 
 	echo del /q /f "%SYSTEMDRIVE%\Users\%%a\Desktop\Microsoft Edge.lnk"
 	del /q /f "%SYSTEMDRIVE%\Users\%%a\Desktop\Microsoft Edge.lnk"
