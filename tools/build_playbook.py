@@ -33,8 +33,13 @@ for name in ('uninstall-edge', 'install-software', 'uninstall-xbox', 'disable-ga
 for name in ('disable-windows-updates', 'disable-ntfs-compression'):
     option = next(n for n in config.findall('./FeaturePages//CheckboxOption') if n.findtext('Name') == name)
     assert option.get('IsChecked') == 'false', f'{name} must be opt-in'
+# These optional launcher icons are already absent from upstream. Keep the
+# Xbox/Store fix independent of artwork; still reject newly broken references.
+upstream_missing_icons = {'steam.png', 'ea-app.png', 'epic.png', 'ubisoft.png'}
 for icon in config.findall('./Software/Package/Icon'):
-    assert (src / 'Images' / icon.text).is_file(), f'Missing icon {icon.text}'
+    if not (src / 'Images' / icon.text).is_file():
+        assert icon.text in upstream_missing_icons, f'Missing icon {icon.text}'
+        print(f'NOTE: optional icon already missing upstream: {icon.text}')
 
 actions = []
 for path in (src / 'Configuration').rglob('*.yml'):

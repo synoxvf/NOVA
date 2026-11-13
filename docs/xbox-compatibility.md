@@ -50,6 +50,8 @@ exact-name matching, protected/system/framework packages, failed removals,
 explicit Xbox removal and `WhatIf`. The build script checks XML/YAML, feature
 defaults, file references and servicing rules, creates `dist\NOVA.apbx` with AME's
 `malte` password, then extracts it and compares every file with the sources.
+The four optional launcher icons already absent from upstream remain outside
+this change; validation reports these existing omissions without failing.
 
 The modified playbook's user reported it working in their setup. A complete
 automated clean-install and Xbox uninstall/reinstall matrix has not been run.
