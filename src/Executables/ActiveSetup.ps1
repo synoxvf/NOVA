@@ -16,8 +16,6 @@ if ($Edge) {
     $targetSignatures += @(
         'microsoftedge',
         'microsoft edge',
-        'edgeupdate',
-        'edge update',
         'msedge'
     )
 }
@@ -55,6 +53,7 @@ function Test-ComponentSignature {
     )
 
     $payload = "$ComponentId $DisplayName $StubPath".ToLowerInvariant()
+    if ($payload -match 'webview|edgeupdate|edge update') { return $false }
     foreach ($pattern in $Signatures) {
         if ($payload.Contains($pattern)) {
             return $true

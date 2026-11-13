@@ -1,44 +1,19 @@
 title: Disable Components
 actions:
-  # Removing Edge
-  - !appx: {name: '*MicrosoftEdge*', type: family, option: uninstall-edge}
-  - !taskKill: {name: 'MicrosoftEdgeUpdate', option: uninstall-edge}
+  # Removing Edge browser; keep the shared WebView2 runtime and updater.
   - !taskKill: {name: 'msedge', option: uninstall-edge}
-  - !taskKill: {name: 'MicrosoftEdge*', option: uninstall-edge}
   - !taskKill: {name: 'setup', pathContains: '\\Edge', option: uninstall-edge}
-  - !taskKill: {name: "msedgewebview2"}
 
-  - !service: {name: 'edgeupdate', operation: delete, option: uninstall-edge}
-  - !service: {name: 'edgeupdatem', operation: delete, option: uninstall-edge}
   - !service: {name: 'MicrosoftEdgeElevationService', operation: delete, option: uninstall-edge}
-
-  - !scheduledTask: {path: '\MicrosoftEdgeUpdateTaskMachineCore', operation: delete, option: uninstall-edge}
-  - !scheduledTask: {path: '\MicrosoftEdgeUpdateTaskMachineUA', operation: delete, option: uninstall-edge}
-  - !scheduledTask: {path: '\MicrosoftEdgeUpdateBrowserReplacementTask', operation: delete, option: uninstall-edge}
-  - !scheduledTask: {path: '\Microsoft\Windows\MicrosoftEdgeUpdateTaskMachineCore', operation: delete, option: uninstall-edge}
-  - !scheduledTask: {path: '\Microsoft\Windows\MicrosoftEdgeUpdateTaskMachineUA', operation: delete, option: uninstall-edge}
 
   - !file: {path: '%SystemDrive%\Users\Public\Desktop\Microsoft Edge.lnk', option: uninstall-edge}
   - !file: {path: '%ProgramData%\Microsoft\Windows\Start Menu\Programs\Microsoft Edge.lnk', option: uninstall-edge}
   - !file: {path: '%AppData%\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar\Microsoft Edge.lnk', option: uninstall-edge}
   - !file: {path: '%ProgramFiles(x86)%\Microsoft\Edge', option: uninstall-edge}
-  - !file: {path: '%ProgramFiles(x86)%\Microsoft\EdgeUpdate', option: uninstall-edge}
-  - !file: {path: '%ProgramFiles(x86)%\Microsoft\EdgeCore', option: uninstall-edge}
   - !file: {path: '%ProgramFiles(x86)%\Microsoft\Temp', option: uninstall-edge}
-  - !file: {path: '%ProgramData%\Microsoft\EdgeUpdate', option: uninstall-edge}
   - !file: {path: '%LocalAppData%\Microsoft\Edge', option: uninstall-edge}
-  - !file: {path: '%LocalAppData%\Microsoft\EdgeUpdate', option: uninstall-edge}
-  - !file: {path: '%SystemRoot%\SystemApps\Microsoft.MicrosoftEdge_8wekyb3d8bbwe', option: uninstall-edge}
-  - !file: {path: '%SystemRoot%\System32\MicrosoftEdgeCP.exe', option: uninstall-edge}
-  - !file: {path: '%SystemRoot%\System32\MicrosoftEdgeSH.exe', option: uninstall-edge}
-  - !file: {path: '%SystemRoot%\System32\MicrosoftEdgeBCHost.exe', option: uninstall-edge}
-  - !file: {path: '%SystemRoot%\SysWOW64\MicrosoftEdgeCP.exe', option: uninstall-edge}
-  - !file: {path: '%SystemRoot%\SysWOW64\MicrosoftEdgeSH.exe', option: uninstall-edge}
-  - !file: {path: '%SystemRoot%\SysWOW64\MicrosoftEdgeBCHost.exe', option: uninstall-edge}
 
   - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: 'TaskbarMigratedBrowserPin', operation: delete, option: uninstall-edge}
-  - !registryKey: {path: 'HKLM\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate', option: uninstall-edge}
-  - !registryKey: {path: 'HKLM\SOFTWARE\Microsoft\EdgeUpdate', option: uninstall-edge}
   - !registryKey: {path: 'HKLM\SOFTWARE\Microsoft\Edge', option: uninstall-edge}
   - !registryKey: {path: 'HKLM\SOFTWARE\WOW6432Node\Microsoft\Edge', option: uninstall-edge}
   - !registryKey: {path: 'HKCU\SOFTWARE\Microsoft\Edge', option: uninstall-edge}
@@ -85,17 +60,7 @@ actions:
   - !registryKey: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\msedge.exe', option: uninstall-edge}
   - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run', value: 'MicrosoftEdgeAutoLaunch', operation: delete, option: uninstall-edge}
   - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run', value: 'MicrosoftEdgeAutoLaunch', operation: delete, option: uninstall-edge}
-  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\EdgeUpdate', value: 'InstallDefault', type: REG_DWORD, data: '0', option: uninstall-edge}
-  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\EdgeUpdate', value: 'Install{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}', type: REG_DWORD, data: '0', option: uninstall-edge}
-  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\EdgeUpdate', value: 'Install{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}', type: REG_DWORD, data: '0', option: uninstall-edge}
-  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\EdgeUpdate', value: 'UpdateDefault', type: REG_DWORD, data: '0', option: uninstall-edge}
-  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\EdgeUpdate', value: 'Update{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}', type: REG_DWORD, data: '0', option: uninstall-edge}
-  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\EdgeUpdate', value: 'Update{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}', type: REG_DWORD, data: '0', option: uninstall-edge}
-  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\EdgeUpdate', value: 'DoNotUpdateToEdgeWithChromium', type: REG_DWORD, data: '1', option: uninstall-edge}
 
-
-  - !registryKey: {path: 'HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft EdgeWebView', option: uninstall-edge}
-  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run', value: 'Microsoft Edge Update', operation: delete, option: uninstall-edge}
   - !registryValue: {path: 'HKCU\SOFTWARE\RegisteredApplications', value: 'Microsoft Edge', operation: delete, option: uninstall-edge}
   - !registryValue: {path: 'HKCU\SOFTWARE\Classes\.htm\OpenWithProgids', value: 'MSEdgeHTM', operation: delete, option: uninstall-edge}
   - !registryValue: {path: 'HKCU\SOFTWARE\Classes\.html\OpenWithProgids', value: 'MSEdgeHTM', operation: delete, option: uninstall-edge}
@@ -107,14 +72,11 @@ actions:
   - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts', value: 'MSEdgeHTM_microsoft-edge', operation: delete, option: uninstall-edge}
   - !registryKey: {path: 'HKCU\SOFTWARE\Microsoft\Edge', option: uninstall-edge}
 
-  - !registryKey: {path: 'HKCU\SOFTWARE\Microsoft\EdgeWebView', option: uninstall-edge}
-  - !file: {path: '%ProgramFiles(x86)%\\Microsoft\\EdgeWebView', option: uninstall-edge}
-
   - !run: {exeDir: true, exe: 'EDGE.bat', option: uninstall-edge}
   - !powerShell: {command: '.\ActiveSetup.ps1 -Edge', exeDir: true, wait: true, option: uninstall-edge}
 
   # Removing OneDrive
-  - !appx: {name: '*OneDrive*', type: family}
+  - !powerShell: {command: '.\APPX.ps1 -Group OneDrive', exeDir: true, runas: currentUserElevated, wait: true}
   - !taskKill: {name: 'OneDriveStandaloneUpdater'}
   - !taskKill: {name: 'OneDriveSetup'}
   - !taskKill: {name: 'OneDrive*'}
@@ -354,31 +316,8 @@ actions:
 
   # Removing  PC Health Check
   - !file: {path: '%ProgramW6432%\PCHealthCheck'}
-    
-  # Removing AI Components
-  - !scheduledTask: {path: '\Microsoft\Windows\WindowsAI\ClickToDo', operation: deleteFolder}
-  - !scheduledTask: {path: '\Microsoft\Windows\WindowsAI\Recall', operation: deleteFolder}
-  - !scheduledTask: {path: '\Microsoft\Windows\WindowsAI\Settings', operation: deleteFolder}
-  - !scheduledTask: {path: '\Microsoft\Windows\WindowsAI', operation: deleteFolder}
 
-  - !taskKill: {name: 'ai.exe'}
-  - !taskKill: {name: 'Copilot.exe'}
-  - !taskKill: {name: 'aihost.exe'}
-  - !taskKill: {name: 'aicontext.exe'}
-  - !taskKill: {name: 'ClickToDo.exe'}
-  - !taskKill: {name: 'aixhost.exe'}
-  - !taskKill: {name: 'WorkloadsSessionHost.exe'}
-
-  - !service: {name: 'WSAIFabricSvc', operation: delete}
-
-  - !appx: {name: '*MicrosoftWindows.Client.CoreAI*', type: family}
-  - !appx: {name: '*MicrosoftWindows.Client.AIX*', type: family}
-  - !appx: {name: '*Microsoft.Copilot*', type: family}
-  - !appx: {name: '*Microsoft.Windows.Copilot*', type: family}
-  - !appx: {name: '*Client.CoPilot*', type: family}
-  - !appx: {name: '*Ai.Copilot*', type: family}
-  - !appx: {name: '*Client.CoreAI*', type: family}
-
+  # Disable AI through policies; keep system packages, services and task registrations.
   - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot', value: 'TurnOffWindowsCopilot', type: REG_DWORD, data: '1'}
   - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsAI', value: 'DisableAIDataAnalysis', type: REG_DWORD, data: '1'}
   - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsAI', value: 'AllowRecallEnablement', type: REG_DWORD, data: '0'}
@@ -433,6 +372,3 @@ actions:
   - !run: {exe: 'DISM.exe', args: '/Online /Disable-Feature /FeatureName:Workfolders-client /NoRestart'}
   - !run: {exe: 'DISM.exe', args: '/Online /Disable-Feature /FeatureName:WCF-Services45 /NoRestart'}
   - !run: {exe: 'DISM.exe', args: '/Online /Disable-Feature /FeatureName:WCF-TCP-PortSharing45 /NoRestart'}
- 
-
-  

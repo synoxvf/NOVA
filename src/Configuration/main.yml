@@ -13,15 +13,24 @@ actions:
     wait: true
     exeDir: true
 
-  # Windows Update
-  - !writeStatus: {status: 'Suspending Windows Updates'}
-  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU', value: 'NoAutoUpdate', type: REG_DWORD, data: '1'}
-  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU', value: 'AUOptions', type: REG_DWORD, data: '1'}
+  # Keep Windows Update and Store available. The issue #7 Stage/Evaluated
+  # failure has not been reproduced here; update settings alone cannot repair
+  # an already damaged StateRepository.
+  - !writeStatus: {status: 'Configuring Windows Update & Store'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU', value: 'NoAutoUpdate', operation: delete}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU', value: 'AUOptions', operation: delete}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings', value: 'PauseUpdatesStartTime', operation: delete}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings', value: 'PauseUpdatesExpiryTime', operation: delete}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings', value: 'PauseQualityUpdatesStartTime', operation: delete}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings', value: 'PauseQualityUpdatesEndTime', operation: delete}
+
   - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate', value: 'ExcludeWUDriversInQualityUpdate', type: REG_DWORD, data: '1'}
   - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching', value: 'SearchOrderConfig', type: REG_DWORD, data: '0'}
-  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\WindowsStore', value: 'AutoDownload', type: REG_DWORD, data: '2'}
+  # Documented Store policy: 2 disables automatic app updates, 4 enables them.
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\WindowsStore', value: 'AutoDownload', type: REG_DWORD, data: '4'}
   - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsAI', value: 'DisableAIDataAnalysis', type: REG_DWORD, data: '1'}
-  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization', value: 'DODownloadMode', type: REG_DWORD, data: '99'}
+  # Delivery Optimization has to stay usable - it delivers the Store payloads.
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization', value: 'DODownloadMode', type: REG_DWORD, data: '0'}
   - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WindowsSelfHost\UI\Visibility', value: 'HideInsiderPage', type: REG_DWORD, data: '1'}
   - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds', value: 'AllowBuildPreview', type: REG_DWORD, data: '0'}
   - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds', value: 'EnableExperimentation', type: REG_DWORD, data: '0'}
@@ -33,12 +42,18 @@ actions:
   - !registryKey: {path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\Orchestrator\UScheduler_Oobe\CrossDeviceUpdate', operation: delete}
   - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Orchestrator\UScheduler\DevHomeUpdate', value: 'workCompleted', type: REG_DWORD, data: '1'}
   - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Orchestrator\UScheduler\OutlookUpdate', value: 'workCompleted', type: REG_DWORD, data: '1'}
-  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings', value: 'PauseUpdatesStartTime', type: REG_SZ, data: '2024-01-01T00:00:00Z'}
-  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings', value: 'PauseUpdatesExpiryTime', type: REG_SZ, data: '2030-12-31T23:59:59Z'}
-  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings', value: 'PauseFeatureUpdatesStartTime', type: REG_SZ, data: '2024-01-01T00:00:00Z'}
-  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings', value: 'PauseFeatureUpdatesEndTime', type: REG_SZ, data: '2030-12-31T23:59:59Z'}
-  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings', value: 'PauseQualityUpdatesStartTime', type: REG_SZ, data: '2024-01-01T00:00:00Z'}
-  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings', value: 'PauseQualityUpdatesEndTime', type: REG_SZ, data: '2030-12-31T23:59:59Z'}
+  # Remove the old indefinite pause dates from the actual Windows Update key.
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings', value: 'PauseFeatureUpdatesStartTime', operation: delete}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings', value: 'PauseFeatureUpdatesEndTime', operation: delete}
+
+  # Explicit opt-out of Windows automatic updates. Leave this unchecked for Xbox.
+  - !writeStatus: {status: 'Suspending all Windows Updates', option: disable-windows-updates}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU', value: 'NoAutoUpdate', type: REG_DWORD, data: '1', option: disable-windows-updates}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU', value: 'AUOptions', type: REG_DWORD, data: '1', option: disable-windows-updates}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings', value: 'PauseUpdatesStartTime', type: REG_SZ, data: '2024-01-01T00:00:00Z', option: disable-windows-updates}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings', value: 'PauseUpdatesExpiryTime', type: REG_SZ, data: '2030-12-31T23:59:59Z', option: disable-windows-updates}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings', value: 'PauseQualityUpdatesStartTime', type: REG_SZ, data: '2024-01-01T00:00:00Z', option: disable-windows-updates}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings', value: 'PauseQualityUpdatesEndTime', type: REG_SZ, data: '2030-12-31T23:59:59Z', option: disable-windows-updates}
 
   # Security
   - !writeStatus: {status: 'Disabling Defender', option: disable-defender}
@@ -86,6 +101,6 @@ actions:
 
   # Cleaning 
   - !writeStatus: {status: 'System Cleanup'}
-  - !run: {exe: 'DISM.exe', args: '/Online /Cleanup-Image /StartComponentCleanup /ResetBase', wait: true, ignoreErrors: true}
+  # Leave component-store maintenance to Windows after OOBE completes.
   - !powerShell: {command: '.\CLEANER.ps1', exeDir: true, wait: true}
   - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce', value: 'DeleteDefaultUser0', type: REG_SZ, data: 'powershell.exe -NoProfile -WindowStyle Hidden -Command "net user defaultuser0 /delete >$null 2>&1; Get-CimInstance Win32_UserProfile | Where-Object LocalPath -match ''defaultuser0'' | Remove-CimInstance >$null 2>&1"'}
