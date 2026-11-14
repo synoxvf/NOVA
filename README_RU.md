@@ -19,6 +19,9 @@
     <a href="https://youtu.be/gD3zmOf6Xqc" aria-label="YouTube обзор" rel="noopener" target="_blank">
       <img src="https://img.shields.io/badge/YOUTUBE-INTRODUCING-5B3CA1?style=for-the-badge&logo=youtube" alt="YouTube">
     </a>
+    <a href="dsc.gg/nova-project" aria-label="Discord сервер" rel="noopener" target="_blank">
+      <img src="https://img.shields.io/badge/DISCORD-COMMUNITY-5B3CA1?style=for-the-badge&logo=discord&logoColor=white" alt="Discord">
+    </a>
   </p>
 
   <p>
@@ -183,10 +186,13 @@ NOVA следует принципам Open Source. Файл playbook (`.apbx`) 
 
 ## Поддержка
 
-Есть идеи или нашли ошибку? Откройте issue или присоединяйтесь к обсуждению на GitHub.
+Есть идеи или нашли ошибку? Откройте issue на GitHub или присоединяйтесь к нашему Discord-сообществу.
 
 <div>
   <a href="https://github.com/synoxvf/NOVA/issues" aria-label="Обсуждения и вопросы">
     <img src="https://img.shields.io/badge/JOIN-THE_DISCUSSION%2FISSUES%2FFEATURES-5B3CA1?style=for-the-badge&logo=github&logoColor=white" alt="Discussion">
+  </a>
+  <a href="dsc.gg/nova-project" aria-label="Discord сервер" rel="noopener" target="_blank">
+    <img src="https://img.shields.io/badge/DISCORD-COMMUNITY-5B3CA1?style=for-the-badge&logo=discord&logoColor=white" alt="Discord">
   </a>
 </div>

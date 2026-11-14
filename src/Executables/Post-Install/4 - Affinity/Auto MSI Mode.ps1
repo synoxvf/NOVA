@@ -17,7 +17,7 @@ try {
 
         if ($isGpu -or ($desc -match $peripheralPattern)) {
             $cleanPath = $_.PSPath -replace 'Microsoft\.PowerShell\.Core\\Registry::', 'HKLM:'
-            $devices.Add([pscustomobject]@{ Path = $cleanPath; IsGpu = $isGpu })
+            $devices.Add([pscustomobject]@{ Path = $cleanPath })
         }
     }
 
@@ -27,7 +27,7 @@ try {
         $entry   = Get-Item -Path $usbPath -ErrorAction Ignore
         if ($entry) {
             $cleanPath = $entry.PSPath -replace 'Microsoft\.PowerShell\.Core\\Registry::', 'HKLM:'
-            $devices.Add([pscustomobject]@{ Path = $cleanPath; IsGpu = $false })
+            $devices.Add([pscustomobject]@{ Path = $cleanPath })
         }
     }
 
@@ -46,8 +46,7 @@ try {
             Remove-ItemProperty -Path $msiPath -Name 'MessageNumberLimit' -ErrorAction Ignore
 
             if (-not $isLaptop) {
-                $priority = if ($device.IsGpu) { 3 } else { 0 }
-                Set-ItemProperty -Path $affinityPath -Name 'DevicePriority' -Type DWord -Value $priority -Force
+                Set-ItemProperty -Path $affinityPath -Name 'DevicePriority' -Type DWord -Value 0 -Force
             }
         } catch { }
     }

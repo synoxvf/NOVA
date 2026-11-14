@@ -6,7 +6,7 @@ actions:
   - !taskKill: {name: 'msedge', option: uninstall-edge}
   - !taskKill: {name: 'MicrosoftEdge*', option: uninstall-edge}
   - !taskKill: {name: 'setup', pathContains: '\\Edge', option: uninstall-edge}
-  - !taskKill: {name: "msedgewebview2"}
+  - !taskKill: {name: 'msedgewebview2', option: uninstall-edge}
 
   - !service: {name: 'edgeupdate', operation: delete, option: uninstall-edge}
   - !service: {name: 'edgeupdatem', operation: delete, option: uninstall-edge}
@@ -361,13 +361,13 @@ actions:
   - !scheduledTask: {path: '\Microsoft\Windows\WindowsAI\Settings', operation: deleteFolder}
   - !scheduledTask: {path: '\Microsoft\Windows\WindowsAI', operation: deleteFolder}
 
-  - !taskKill: {name: 'ai.exe'}
-  - !taskKill: {name: 'Copilot.exe'}
-  - !taskKill: {name: 'aihost.exe'}
-  - !taskKill: {name: 'aicontext.exe'}
-  - !taskKill: {name: 'ClickToDo.exe'}
-  - !taskKill: {name: 'aixhost.exe'}
-  - !taskKill: {name: 'WorkloadsSessionHost.exe'}
+  - !taskKill: {name: 'ai'}
+  - !taskKill: {name: 'Copilot'}
+  - !taskKill: {name: 'aihost'}
+  - !taskKill: {name: 'aicontext'}
+  - !taskKill: {name: 'ClickToDo'}
+  - !taskKill: {name: 'aixhost'}
+  - !taskKill: {name: 'WorkloadsSessionHost'}
 
   - !service: {name: 'WSAIFabricSvc', operation: delete}
 
@@ -433,6 +433,29 @@ actions:
   - !run: {exe: 'DISM.exe', args: '/Online /Disable-Feature /FeatureName:Workfolders-client /NoRestart'}
   - !run: {exe: 'DISM.exe', args: '/Online /Disable-Feature /FeatureName:WCF-Services45 /NoRestart'}
   - !run: {exe: 'DISM.exe', args: '/Online /Disable-Feature /FeatureName:WCF-TCP-PortSharing45 /NoRestart'}
- 
 
-  
+  # Microsoft Update Health Tools & Remediation
+  - !taskKill: {name: 'uhssvc*'}
+  - !taskKill: {name: 'expediteupdater*'}
+  - !taskKill: {name: 'sedlauncher*'}
+  - !taskKill: {name: 'remsh*'}
+
+  - !service: {name: 'uhssvc', operation: delete}
+
+  - !scheduledTask: {path: '\Microsoft\Windows\remsh', operation: deleteFolder}
+  - !scheduledTask: {path: '\Microsoft\Windows\WaaSMedic\DeferredWork', operation: delete}
+  - !scheduledTask: {path: '\Microsoft\Windows\WaaSMedic\PerformRemediation', operation: delete}
+  - !scheduledTask: {path: '\Microsoft\Windows\UpdateOrchestrator\Start Oobe Expedite Work', operation: delete}
+
+  - !file: {path: '%ProgramFiles%\Microsoft Update Health Tools'}
+  - !file: {path: '%ProgramFiles(x86)%\Microsoft Update Health Tools'}
+  - !file: {path: '%SystemRoot%\System32\remsh.exe'}
+
+  - !powerShell:
+      command: |
+        $keys = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall', 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall'
+        Get-ChildItem -Path $keys -ErrorAction SilentlyContinue | ForEach-Object { Get-ItemProperty $_.PSPath } | Where-Object { $_.DisplayName -match 'Update Health Tools' } | ForEach-Object {
+            Start-Process -FilePath 'msiexec.exe' -ArgumentList "/x $($_.PSChildName) /qn /norestart" -Wait -NoNewWindow -ErrorAction SilentlyContinue
+            Remove-Item -Path $_.PSPath -Recurse -Force -ErrorAction SilentlyContinue
+        }
+      wait: true

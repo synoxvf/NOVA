@@ -8,6 +8,15 @@ actions:
     source: chocolatey
     package: 'directx'
 
+  # Visual C++ Runtimes
+  - !writeStatus: {status: 'Installing Visual C++ Runtimes', option: install-vcredist}
+  - !download:
+    option: install-vcredist
+    url: 'https://github.com/abbodi1406/vcredist/releases/latest/download/VisualCppRedist_AIO_x86_x64.exe'
+    destination: 'VisualCppRedist_AIO_x86_x64.exe'
+    package: 'vcredist'
+  - !run: {exe: 'VisualCppRedist_AIO_x86_x64.exe', args: '/ai /gm2', exeDir: true, wait: true, option: install-vcredist}
+
   # Browsers
   - !writeStatus: {status: 'Installing Brave', option: browser-brave}
   - !download:
@@ -107,7 +116,7 @@ actions:
     name: 'ea-app'
     source: chocolatey
     package: 'ea-app'
-  - !taskKill: {name: 'EA*'}
+  - !taskKill: {name: 'EA*', option: ea-app}
 
   - !writeStatus: {status: 'Installing Epic Games', option: epicgameslauncher}
   - !software:

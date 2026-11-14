@@ -9,7 +9,7 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
 $proc     = '54533251-82be-4824-96c1-47b60b740d00'
-$novaGuid = '00000000-0000-0000-0000-000000000000'
+$novaGuid = '2260e152-6d07-4704-affc-0c74cebbdde0'
 $powerCfg = Join-Path -Path $env:SystemRoot -ChildPath 'System32\powercfg.exe'
 
 if (-not (Test-Path -LiteralPath $powerCfg)) {
@@ -31,10 +31,8 @@ function Invoke-PowerCfg {
 Invoke-PowerCfg -Arguments @('/query', $novaGuid)
 
 $name = ''
-$isIntel = $false
 if ($SimulatedProcessorName) {
     $name = $SimulatedProcessorName.Trim()
-    $isIntel = $name -match 'Intel'
 } else {
     $cpu = Get-CimInstance -ClassName Win32_Processor -ErrorAction Stop |
         Select-Object -First 1
@@ -42,7 +40,6 @@ if ($SimulatedProcessorName) {
         throw 'Win32_Processor did not return a CPU.'
     }
     $name = $cpu.Name.Trim()
-    $isIntel = $cpu.Manufacturer -match 'Intel'
 }
 
 $isDualCcdX3D = ($name -match 'Ryzen.*(7900X3D|7950X3D|9900X3D|9950X3D)' -or ($name -match 'Ryzen\s+9' -and $name -match 'X3D'))
@@ -126,6 +123,12 @@ function Set-Idx {
     Invoke-PowerCfg -Arguments @('/setdcvalueindex', $novaGuid, $proc, $Setting, $Dc)
 }
 
+Invoke-PowerCfg -Arguments @('/setacvalueindex', $novaGuid, 'fea3413e-7e05-4911-9a71-700331f1c294', '245d8541-3943-4422-b025-13a784f679b7', 2)
+Invoke-PowerCfg -Arguments @('/setdcvalueindex', $novaGuid, 'fea3413e-7e05-4911-9a71-700331f1c294', '245d8541-3943-4422-b025-13a784f679b7', 2)
+Invoke-PowerCfg -Arguments @('/setacvalueindex', $novaGuid, '48672f38-7a9a-4bb2-8bf8-3d85be19de4e', '2bfc24f9-5ea2-4801-8213-3dbae01aa39d', 0)
+Invoke-PowerCfg -Arguments @('/setdcvalueindex', $novaGuid, '48672f38-7a9a-4bb2-8bf8-3d85be19de4e', '2bfc24f9-5ea2-4801-8213-3dbae01aa39d', 0)
+Invoke-PowerCfg -Arguments @('/setacvalueindex', $novaGuid, '48672f38-7a9a-4bb2-8bf8-3d85be19de4e', '73cde64d-d720-4bb2-a860-c755afe77ef2', 50)
+Invoke-PowerCfg -Arguments @('/setdcvalueindex', $novaGuid, '48672f38-7a9a-4bb2-8bf8-3d85be19de4e', '73cde64d-d720-4bb2-a860-c755afe77ef2', 50)
 
 if ($isHybrid) {
     Set-Idx '93b8b6dc-0698-4d1c-9ee4-0644e900c85d' 2   5

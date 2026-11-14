@@ -24,10 +24,9 @@ actions:
   # Enabling HAGS
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\GraphicsDrivers', value: 'HwSchMode', type: REG_DWORD, data: '2'}
 
-  # Import Power Plan "Ultimate Perfomance" & "NOVA"
-  - !cmd: {command: 'powercfg /import "%windir%\NOVA.pow" 00000000-0000-0000-0000-000000000000'}
+  # Import Power Plan NOVA
+  - !cmd: {command: 'powercfg /import "%windir%\NOVA.pow" 2260e152-6d07-4704-affc-0c74cebbdde0', wait: true}
   - !powerShell: {command: '.\POWERPLAN.ps1', exeDir: true, wait: true}
-  - !cmd: {command: 'powercfg /setactive 00000000-0000-0000-0000-000000000000'}
 
   # Disabling Hibirnation
   - !cmd: {command: 'powercfg /h off', option: 'disable-hibernation'}
@@ -58,9 +57,7 @@ actions:
         if (-not (Test-Path $path)) { New-Item -Path $path -Force | Out-Null }
         foreach ($pair in @(
           @{ Name = 'IdlePowerMode'; Value = '* 0' },
-          @{ Name = 'DisableDSTThrottle'; Value = '* 1' },
-          @{ Name = 'InterruptCoalescingTime'; Value = '* 0' },
-          @{ Name = 'InterruptCoalescingEntry'; Value = '* 0' }
+          @{ Name = 'DisableDSTThrottle'; Value = '* 1' }
         )) {
           Remove-ItemProperty -Path $path -Name $pair.Name -ErrorAction SilentlyContinue
           New-ItemProperty -Path $path -Name $pair.Name -PropertyType MultiString -Value @($pair.Value) -Force | Out-Null
@@ -69,7 +66,7 @@ actions:
       runas: currentUserElevated
       wait: true
 
-  # Disabling background raw mouse throttling
+  # Increase background raw mouse throttling
   - !registryValue: {path: 'HKCU\Control Panel\Mouse', value: 'RawMouseThrottleDuration', type: REG_DWORD, data: '20'}
 
   # Disabling WDF global logging and Sleep Study collection

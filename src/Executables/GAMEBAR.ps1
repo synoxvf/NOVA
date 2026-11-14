@@ -1,7 +1,6 @@
 [CmdletBinding(SupportsShouldProcess = $true)]
 param(
     [switch]$ConfigureGameBar,
-    [switch]$UninstallXbox,
     [string]$SimulatedProcessorName,
     [switch]$TestMode
 )
@@ -128,57 +127,12 @@ function Set-UserRegistryValue {
     }
 }
 
-function Remove-XboxAppxPackages {
-    [CmdletBinding()]
-    param(
-        [string[]]$Packages
-    )
-
-    if ($TestMode) { return }
-
-    foreach ($pkg in $Packages) {
-        # Provisioned packages (staged for new users)
-        Get-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue | Where-Object {
-            $_.PackageName -like $pkg -or $_.DisplayName -like $pkg
-        } | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
-
-        # Existing user packages
-        Get-AppxPackage -Name $pkg -AllUsers -ErrorAction SilentlyContinue | ForEach-Object {
-            Remove-AppxPackage -Package $_.PackageFullName -AllUsers -ErrorAction SilentlyContinue
-        }
-    }
-}
-
 if ($isDualCcdX3D) {
     if ($ConfigureGameBar) {
         Set-UserRegistryValue -SubKey 'SOFTWARE\Microsoft\GameBar' -Name 'AppCaptureEnabled'   -Value 0
         Set-UserRegistryValue -SubKey 'SOFTWARE\Microsoft\GameBar' -Name 'AutoGameModeEnabled' -Value 1
         Set-UserRegistryValue -SubKey 'SOFTWARE\Microsoft\GameBar' -Name 'AllowAutoGameMode'    -Value 1
         Set-UserRegistryValue -SubKey 'System\GameConfigStore'    -Name 'GameDVR_enabled'       -Value 0
-    }
-
-    if ($UninstallXbox) {
-        $targetPackages = @(
-            '*Microsoft.GamingApp*',
-            '*Microsoft.XboxApp*',
-            '*Microsoft.XboxSpeechToTextOverlay*',
-            '*Microsoft.XboxIdentityProvider*',
-            '*Microsoft.Xbox.TCUI*'
-        )
-        $telemetry.AppxRemoved = $targetPackages
-
-        Remove-XboxAppxPackages -Packages $targetPackages
-
-        $targetServices = @('XblAuthManager', 'XblGameSave', 'XboxNetApiSvc')
-        $telemetry.ServicesDisabled = $targetServices
-
-        if (-not $TestMode) {
-            foreach ($svc in $targetServices) {
-                Set-Service -Name $svc -StartupType Manual -ErrorAction SilentlyContinue
-                Stop-Service -Name $svc -Force -ErrorAction SilentlyContinue
-            }
-            Unregister-ScheduledTask -TaskName 'XblGameSaveTask' -TaskPath '\Microsoft\Windows\XblGameSave\' -Confirm:$false -ErrorAction SilentlyContinue
-        }
     }
 } else {
     if ($ConfigureGameBar) {
@@ -193,34 +147,15 @@ if ($isDualCcdX3D) {
         Set-UserRegistryValue -SubKey 'SOFTWARE\Microsoft\GameBar' -Name 'UseNexusForGameBarEnabled' -Value 0
         Set-UserRegistryValue -SubKey 'SOFTWARE\Microsoft\GameBar' -Name 'ShowStartupPanel'          -Value 0
         Set-UserRegistryValue -SubKey 'System\GameConfigStore'    -Name 'GameDVR_enabled'           -Value 0
-    }
 
-    if ($UninstallXbox) {
-        $targetPackages = @(
-            '*Microsoft.GamingApp*',
-            '*Microsoft.Xbox*',
-            '*Microsoft.GamingServices*',
-            '*Microsoft.XboxGameCallableUI*',
-            '*Microsoft.Xbox.TCUI*',
-            '*Microsoft.XboxApp*',
-            '*Microsoft.XboxGameOverlay*',
-            '*Microsoft.XboxGamingOverlay*',
-            '*Microsoft.XboxIdentityProvider*',
-            '*Microsoft.XboxSpeechToTextOverlay*'
-        )
-        $telemetry.AppxRemoved = $targetPackages
-
-        Remove-XboxAppxPackages -Packages $targetPackages
-
-        $targetServices = @('XblAuthManager', 'XblGameSave', 'XboxGipSvc', 'XboxNetApiSvc')
-        $telemetry.ServicesDisabled = $targetServices
-
-        if (-not $TestMode) {
-            foreach ($svc in $targetServices) {
-                Set-Service -Name $svc -StartupType Manual -ErrorAction SilentlyContinue
-                Stop-Service -Name $svc -Force -ErrorAction SilentlyContinue
-            }
-            Unregister-ScheduledTask -TaskName 'XblGameSaveTask' -TaskPath '\Microsoft\Windows\XblGameSave\' -Confirm:$false -ErrorAction SilentlyContinue
+        $protocols = @('ms-gamebar', 'ms-gamingoverlay', 'ms-gamebarservices')
+        foreach ($proto in $protocols) {
+            $protoPath = "HKLM:\SOFTWARE\Classes\$proto"
+            $cmdPath   = "$protoPath\shell\open\command"
+            Set-RegistryValueRecord -Path $protoPath -Name '(Default)'    -Value "URL:$proto" -Type 'String'
+            Set-RegistryValueRecord -Path $protoPath -Name 'URL Protocol' -Value ''           -Type 'String'
+            Set-RegistryValueRecord -Path $protoPath -Name 'NoOpenWith'   -Value ''           -Type 'String'
+            Set-RegistryValueRecord -Path $cmdPath   -Name '(Default)'    -Value '%SystemRoot%\System32\systray.exe' -Type 'ExpandString'
         }
     }
 }

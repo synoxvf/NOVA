@@ -1,58 +1,13 @@
 title: APPX
-description: Removal of certain Windows apps
+description: Removal of certain Windows apps via native Windows API
 actions:
-  - !appx: {name: '*Microsoft.Microsoft3DViewer*', type: family}
-  - !appx: {name: '*Microsoft.BingSearch*', type: family}
-  - !appx: {name: '*Microsoft.WindowsCamera*', type: family}
-  - !appx: {name: '*Clipchamp.Clipchamp*', type: family}
-  - !appx: {name: '*Microsoft.WindowsAlarms*', type: family}
-  - !appx: {name: '*Microsoft.Copilot*', type: family}
-  - !appx: {name: '*Microsoft.549981C3F5F10*', type: family}
-  - !appx: {name: '*Microsoft.Windows.DevHome*', type: family}
-  - !appx: {name: '*MicrosoftCorporationII.MicrosoftFamily*', type: family}
-  - !appx: {name: '*Microsoft.WindowsFeedbackHub*', type: family}
-  - !appx: {name: '*Microsoft.Edge.GameAssist*', type: family}
-  - !appx: {name: '*Microsoft.GetHelp*', type: family}
-  - !appx: {name: '*Microsoft.Getstarted*', type: family}
-  - !appx: {name: '*microsoft.windowscommunicationsapps*', type: family}
-  - !appx: {name: '*Microsoft.WindowsMaps*', type: family}
-  - !appx: {name: '*Microsoft.MixedReality.Portal*', type: family}
-  - !appx: {name: '*Microsoft.BingNews*', type: family}
-  - !appx: {name: '*Microsoft.MicrosoftOfficeHub*', type: family}
-  - !appx: {name: '*Microsoft.Office.OneNote*', type: family}
-  - !appx: {name: '*Microsoft.OutlookForWindows*', type: family}
-  - !appx: {name: '*Microsoft.Paint*', type: family}
-  - !appx: {name: '*Microsoft.MSPaint*', type: family}
-  - !appx: {name: '*Microsoft.People*', type: family}
-  - !appx: {name: '*Microsoft.PowerAutomateDesktop*', type: family}
-  - !appx: {name: '*MicrosoftCorporationII.QuickAssist*', type: family}
-  - !appx: {name: '*Microsoft.SkypeApp*', type: family}
-  - !appx: {name: '*Microsoft.MicrosoftSolitaireCollection*', type: family}
-  - !appx: {name: '*Microsoft.MicrosoftStickyNotes*', type: family}
-  - !appx: {name: '*MicrosoftTeams*', type: family}
-  - !appx: {name: '*MSTeams*', type: family}
-  - !appx: {name: '*Microsoft.Todos*', type: family}
-  - !appx: {name: '*Microsoft.WindowsSoundRecorder*', type: family}
-  - !appx: {name: '*Microsoft.Wallet*', type: family}
-  - !appx: {name: '*Microsoft.BingWeather*', type: family}
-  - !appx: {name: '*Microsoft.YourPhone*', type: family}
-  - !appx: {name: '*Microsoft.ZuneMusic*', type: family}
-  - !appx: {name: '*Apprep.Chx*', type: family}
-  - !appx: {name: '*AssignedAccessLockApp*', type: family}
-  - !appx: {name: '*Bing*', type: family}
-  - !appx: {name: '*CamoStudio*', type: family}
-  - !appx: {name: '*Microsoft.Messaging*', type: family}
-  - !appx: {name: '*Microsoft.OneConnect*', type: family}
-  - !appx: {name: '*OOBENetwork*', type: family}
-  - !appx: {name: '*Parental*', type: family}
-  - !appx: {name: '*PeopleExperienceHost*', type: family}
-  - !appx: {name: '*PinningConfirmationDialog*', type: family}
+  - !powerShell: {command: '.\APPX.ps1', exeDir: true, wait: true}
 
-  # Removing Xbox
-  - !powerShell: {command: '.\GAMEBAR.ps1 -UninstallXbox', exeDir: true, wait: true, option: uninstall-xbox}
+  # Disable Windows Backup
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\SettingSync', value: 'EnableWindowsBackup', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\Backup', value: 'DisableBackup', type: REG_DWORD, data: '1'}
 
   # Other 
-  - !appx: {name: '*WindowsBackup*', type: app}
   - !appx: {name: '*StartMenuExperienceHost*', operation: clearCache}
   - !appx: {name: '*Windows.SecHealthUI*', operation: clearCache}
   - !appx: {name: '*Windows.Search*', operation: clearCache} 

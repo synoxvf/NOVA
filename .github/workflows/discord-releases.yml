@@ -1,0 +1,60 @@
+
+name: NOVA Discord Releases
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord notification
+        env:
+          WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import urllib.request
+
+          with open(os.environ["GITHUB_EVENT_PATH"], encoding="utf-8") as f:
+              event = json.load(f)
+
+          release = event.get("release")
+
+          if release:
+              tag = release.get("tag_name") or "New release"
+              title = f"NOVA {tag}"
+              description = release.get("body") or "New release available."
+              url = release.get("html_url")
+          else:
+              title = "NOVA - Test Notification"
+              description = "GitHub Actions integration works!"
+              url = "https://github.com/synoxvf/NOVA/releases"
+
+          payload = {
+              "username": "NOVA Releases",
+              "embeds": [{
+                  "title": title[:256],
+                  "description": description[:3800],
+                  "url": url,
+                  "color": 5793266
+              }],
+              "allowed_mentions": {"parse": []}
+          }
+
+          req = urllib.request.Request(
+              os.environ["WEBHOOK_URL"],
+              data=json.dumps(payload).encode("utf-8"),
+              headers={"Content-Type": "application/json"},
+              method="POST"
+          )
+
+          with urllib.request.urlopen(req, timeout=20) as response:
+              print("Discord status:", response.status)
+          PY
