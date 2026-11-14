@@ -1,9 +1,8 @@
-
 name: NOVA GitHub Activity
 
 on:
   issues:
-    types: [opened, closed, reopened]
+    types: [opened, closed, reopened, labeled]
 
   issue_comment:
     types: [created]
@@ -28,77 +27,120 @@ jobs:
           python3 - <<'PY'
           import json
           import os
+          import sys
           import urllib.request
+          import urllib.error
+
+          webhook_url = os.environ.get("WEBHOOK_URL")
+          if not webhook_url:
+              print("Error: DISCORD_ACTIVITY_WEBHOOK_URL secret is not set in repository settings.")
+              sys.exit(1)
 
           with open(os.environ["GITHUB_EVENT_PATH"], encoding="utf-8") as f:
               event = json.load(f)
 
           event_type = os.environ["GITHUB_EVENT_NAME"]
-          action = event.get("action")
+          action = event.get("action", "")
+          sender = event.get("sender") or {}
+          author_name = sender.get("login") or "Contributor"
+          author_avatar = sender.get("avatar_url") or "https://github.com/synoxvf.png"
+          author_url = sender.get("html_url") or "https://github.com/synoxvf/NOVA"
+
+          COLOR_NOVA = 0xB68CFA
 
           if event_type == "issues":
               item = event["issue"]
-              status = {
-                  "opened": "Issue Opened",
-                  "closed": "Issue Closed",
-                  "reopened": "Issue Reopened",
-              }[action]
-              color = 0x57F287 if action == "opened" else 0xED4245
+              verb = "opened" if action == "opened" else ("closed" if action == "closed" else action)
+              author_header = f"{author_name} {verb} an issue"
+
+              labels = [l.get("name") for l in item.get("labels", []) if l.get("name")]
+              tags_str = f"[{', '.join(labels)}] " if labels else ""
+
+              title = f"Issue #{item['number']} {tags_str}— {item['title']}"
               url = item["html_url"]
-              title = f"{status} #{item['number']}"
-              description = item["title"]
+              color = 0xED4245
+              btn_label = "View Issue on GitHub"
+              body = item.get("body") or ""
 
           elif event_type == "pull_request_target":
               item = event["pull_request"]
-              if action == "closed":
-                  status = "PR Merged" if item["merged"] else "PR Closed"
-              else:
-                  status = f"PR {action.capitalize()}"
-
-              color = 0x9B59B6 if item.get("merged") else 0x5865F2
+              is_merged = bool(item.get("merged"))
+              verb = "merged" if is_merged else ("closed" if action == "closed" else action)
+              author_header = f"{author_name} {verb} a pull request"
+              title = f"PR #{item['number']} — {item['title']}"
               url = item["html_url"]
-              title = f"{status} #{item['number']}"
-              description = item["title"]
+              color = COLOR_NOVA if is_merged else (0xED4245 if action == "closed" else 0x57F287)
+              btn_label = "View Pull Request"
+              body = item.get("body") or ""
 
           elif event_type == "issue_comment":
               item = event["issue"]
-
               if "pull_request" in item:
-                  exit(0)
+                  sys.exit(0)
 
               comment = event["comment"]
-              title = f"New Comment on Issue #{item['number']}"
-              description = (
-                  f"**{item['title']}**\n\n"
-                  f"{comment.get('body') or 'No text'}"
-              )
+              author_header = f"{author_name} commented on #{item['number']}"
+              title = f"Issue #{item['number']} — {item['title']}"
               url = comment["html_url"]
-              color = 0x3498DB
+              color = COLOR_NOVA
+              btn_label = "View Comment"
+              body = comment.get("body") or ""
 
           else:
-              title = "NOVA Integration Test"
-              description = "GitHub Activity notifications are working!"
+              author_header = "NOVA Integration Test"
+              title = "GitHub Activity Test"
               url = "https://github.com/synoxvf/NOVA"
-              color = 0x57F287
+              color = COLOR_NOVA
+              btn_label = "Open Repository"
+              body = "GitHub Activity notifications are working."
+
+          clean_body = body.strip()[:600].strip()
+          description = f"```\n{clean_body}\n```" if clean_body else ""
 
           payload = {
-              "username": "NOVA GitHub",
+              "username": "NOVA",
+              "avatar_url": "https://raw.githubusercontent.com/synoxvf/NOVA/main/src/playbook.png",
               "embeds": [{
+                  "author": {
+                      "name": author_header,
+                      "url": author_url,
+                      "icon_url": author_avatar
+                  },
                   "title": title[:256],
-                  "description": description[:3900],
+                  "description": description,
                   "url": url,
                   "color": color
               }],
+              "components": [
+                  {
+                      "type": 1,
+                      "components": [
+                          {
+                              "type": 2,
+                              "style": 5,
+                              "label": btn_label,
+                              "url": url
+                          }
+                      ]
+                  }
+              ],
               "allowed_mentions": {"parse": []}
           }
 
-          request = urllib.request.Request(
-              os.environ["WEBHOOK_URL"],
+          req = urllib.request.Request(
+              webhook_url,
               data=json.dumps(payload).encode("utf-8"),
-              headers={"Content-Type": "application/json"},
+              headers={
+                  "Content-Type": "application/json",
+                  "User-Agent": "DiscordBot (https://github.com/synoxvf/NOVA, 1.0)"
+              },
               method="POST"
           )
 
-          with urllib.request.urlopen(request, timeout=20) as response:
-              print("Discord response:", response.status)
+          try:
+              with urllib.request.urlopen(req, timeout=20) as response:
+                  print("Discord response:", response.status)
+          except urllib.error.HTTPError as e:
+              print(f"Discord API error {e.code}: {e.read().decode('utf-8', errors='replace')}")
+              sys.exit(1)
           PY

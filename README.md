@@ -19,7 +19,7 @@
     <a href="https://youtu.be/gD3zmOf6Xqc" aria-label="YouTube Review" rel="noopener" target="_blank">
       <img src="https://img.shields.io/badge/YOUTUBE-INTRODUCING-5B3CA1?style=for-the-badge&logo=youtube" alt="YouTube">
     </a>
-    <a href="dsc.gg/nova-project" aria-label="Discord Server" rel="noopener" target="_blank">
+    <a href="https://dsc.gg/nova-project" aria-label="Discord Server" rel="noopener" target="_blank">
       <img src="https://img.shields.io/badge/DISCORD-COMMUNITY-5B3CA1?style=for-the-badge&logo=discord&logoColor=white" alt="Discord">
     </a>
   </p>
@@ -192,7 +192,7 @@ Have ideas or found a bug? Open an issue on GitHub or join our Discord community
   <a href="https://github.com/synoxvf/NOVA/issues" aria-label="Discussions and questions">
     <img src="https://img.shields.io/badge/JOIN-THE_DISCUSSION%2FISSUES%2FFEATURES-5B3CA1?style=for-the-badge&logo=github&logoColor=white" alt="Discussion">
   </a>
-  <a href="dsc.gg/nova-project" aria-label="Discord Server" rel="noopener" target="_blank">
+  <a href="https://dsc.gg/nova-project" aria-label="Discord Server" rel="noopener" target="_blank">
     <img src="https://img.shields.io/badge/DISCORD-COMMUNITY-5B3CA1?style=for-the-badge&logo=discord&logoColor=white" alt="Discord">
   </a>
 </div>
